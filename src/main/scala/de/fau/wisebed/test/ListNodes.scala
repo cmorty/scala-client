@@ -19,6 +19,6 @@ object ListNodes {
 		val inact = TH.motes -- TH.activemotes
 		log.info("Aktive Nodes  : " +  TH.activemotes.mkString(", "))
 		log.info("Inaktive Nodes: " +  inact.mkString(", "))
-		
+		TH.finish
 	}
 }
