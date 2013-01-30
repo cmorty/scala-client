@@ -38,7 +38,8 @@ protected case class AddJob[S](id:String, job:Job[S])
 case class RemJob[S](job:Job[S])
 
 protected case class AddMes(mi:messages.MessageInput)
-case class RemMes(mi:messages.MessageInput)
+protected case class RemMes(mi:messages.MessageInput)
+protected case class RemMesAll()
 
 private class MessageInputHolder(mi:MessageInput){
 	val wr:WeakReference[MessageInput] = if(mi.isWeak)
@@ -180,7 +181,14 @@ class ExperimentController extends Controller {
   								mi.get ! m
   							}
   						} 
-  					
+  					case RemMesAll =>
+  						for(mih <- messageHandlers){
+  							messageHandlers -=  mih
+  							val mi = mih.get  							
+  							if(mi != None){
+  								mi.get ! StopAct
+  							}
+  						}
   				//********* Catch potentioal Problems
   					case x => log.error("Got unknow class: {}", x.getClass.toString)
   				
@@ -245,6 +253,7 @@ class ExperimentController extends Controller {
 	@Override
 	def experimentEnded() {
 		for(cb <- endCallbacks) cb()
+		sDisp ! RemMesAll
 	}
 
 	def onEnd(callback: => Unit) {
