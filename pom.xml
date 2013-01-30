@@ -102,7 +102,10 @@
                 </executions>
 				<configuration>
 					  <launchers>
-
+						<launcher>
+						  <id>dev</id>
+						  <mainClass>de.fau.wisebed.test.Dev</mainClass>
+						</launcher>
 						<launcher>
 						  <id>test</id>
 						  <mainClass>de.fau.wisebed.test.TestClient</mainClass>

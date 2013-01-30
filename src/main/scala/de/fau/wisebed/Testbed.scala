@@ -12,8 +12,12 @@ import java.net.InetAddress
 import javax.xml.datatype.DatatypeFactory
 import scala.collection.JavaConversions._
 import WisebedApiConversions._
+import eu.wisebed.api.common.KeyValuePair
 
-class Testbed(val smEndpointURL:String, val snaaEndpointURL:String, val rsEndpointURL:String) {
+
+class Serverconf(val snaaEndpointURL:String, val rsEndpointURL:String, val conf:List[KeyValuePair])
+
+class Testbed(val smEndpointURL:String) {
 	val log = LoggerFactory.getLogger(this.getClass)
 
 	var credentials = List[snaa.AuthenticationTriple]()
@@ -21,6 +25,15 @@ class Testbed(val smEndpointURL:String, val snaaEndpointURL:String, val rsEndpoi
 	var reservations = List[Reservation]()
 	
 	lazy val sessionManagement = WisebedServiceHelper.getSessionManagementService(smEndpointURL)
+	lazy val serverconf:Serverconf = {
+		val rs = new javax.xml.ws.Holder[String]
+		val snaa = new javax.xml.ws.Holder[String]
+		val options = new javax.xml.ws.Holder[java.util.List[KeyValuePair]]
+		sessionManagement.getConfiguration(rs, snaa, options)		
+		new Serverconf(rs.value, snaa.value, options.value.toList)
+	}
+	lazy val snaaEndpointURL:String = serverconf.snaaEndpointURL
+	lazy val rsEndpointURL:String = serverconf.rsEndpointURL
 	lazy val authenticationSystem = WisebedServiceHelper.getSNAAService(snaaEndpointURL)
 	lazy val reservationSystem = WisebedServiceHelper.getRSService(rsEndpointURL)
 
@@ -96,4 +109,8 @@ class Testbed(val smEndpointURL:String, val snaaEndpointURL:String, val rsEndpoi
 		sessionManagement.areNodesAlive(nodes, url)
 		job		
 	}
+	
+	private def getConfiguration:Serverconf = serverconf
+	
+	
 }

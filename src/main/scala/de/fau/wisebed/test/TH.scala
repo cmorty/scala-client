@@ -10,6 +10,7 @@ import java.util.GregorianCalendar
 import java.util.Calendar
 import de.fau.wisebed.Reservation.reservation2CRD
 import scala.collection.JavaConversions.asScalaBuffer
+import scala.collection.JavaConversions._
 import de.fau.wisebed.Experiment
 import de.fau.wisebed.messages.MessageLogger
 import de.fau.wisebed.messages.MsgLiner
@@ -38,8 +39,7 @@ object TH {
 	
 	val conf = XML.loadFile(conffile)
 	val smEndpointURL = (conf \ "smEndpointURL").text.trim
-	val snaaEndpointURL = (conf \ "snaaEndpointURL").text.trim
-	val rsEndpointURL = (conf \ "rsEndpointURL").text.trim
+
 	
 	val prefix = (conf \ "prefix").text.trim
 	val login = (conf \ "login").text.trim
@@ -48,7 +48,7 @@ object TH {
 	
 	//Get Motes
 	log.debug("Starting Testbed")
-	val tb = new Testbed(smEndpointURL, snaaEndpointURL, rsEndpointURL)
+	val tb = new Testbed(smEndpointURL)
 	log.debug("Requesting Motes")
 	val motes = tb.getnodes()
 	log.debug("Motes: " + motes.mkString(", "))
@@ -139,6 +139,20 @@ object TH {
 	def finish{
 		log.debug("Removing Reservation")
 		res.foreach(tb.freeReservation(_))
+		
+		Thread.sleep(1000 * 4)
+		
+		val st = Thread.getAllStackTraces
+           
+        for(t <- st){
+            if(t._1.isDaemon()){
+                println("Deamon: " + t._1.toString)
+            } else {
+                println("Thread: " +  t._1.toString)
+                t._2.foreach(println(_))
+            }
+        }
+		
 	}
 	
 	
