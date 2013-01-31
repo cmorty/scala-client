@@ -30,17 +30,23 @@ class Testbed(val smEndpointURL:String) {
 		val snaa = new javax.xml.ws.Holder[String]
 		val options = new javax.xml.ws.Holder[java.util.List[KeyValuePair]]
 		sessionManagement.getConfiguration(rs, snaa, options)		
-		new Serverconf(rs.value, snaa.value, options.value.toList)
+		new Serverconf(snaa.value, rs.value, options.value.toList)
 	}
 	lazy val snaaEndpointURL:String = serverconf.snaaEndpointURL
 	lazy val rsEndpointURL:String = serverconf.rsEndpointURL
 	lazy val authenticationSystem = WisebedServiceHelper.getSNAAService(snaaEndpointURL)
 	lazy val reservationSystem = WisebedServiceHelper.getRSService(rsEndpointURL)
+	
+	
 
 	lazy val wiseML = sessionManagement.getNetwork
 	var currentWSNService:wsn.WSN = null
 	
-	lazy val controller = new ExperimentController
+	lazy val controller = {
+		val ec = new ExperimentController
+		log.debug("Local Testbed-controller published on url: {}", ec.url)
+		ec
+	}
 	
 	// Public funcions
 	def getnodes(moteType:Seq[String] = List("telosb")):List[String] = {
@@ -108,6 +114,10 @@ class Testbed(val smEndpointURL:String) {
 		val url = controller.url
 		sessionManagement.areNodesAlive(nodes, url)
 		job		
+	}
+	
+	def getNetwork():String = {
+		sessionManagement.getNetwork()
 	}
 	
 	private def getConfiguration:Serverconf = serverconf
