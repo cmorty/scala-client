@@ -88,7 +88,9 @@ class WisebedController extends Controller {
 	
   	val log = LoggerFactory.getLogger(WisebedController.this.getClass)
 
-  	val url = "http://" + InetAddress.getLocalHost.getCanonicalHostName + ":" + WisebedController.port + "/controller/" + WisebedController.id
+  	val controllerid =  WisebedController.getUniqueID
+  	
+  	val url = "http://" + InetAddress.getLocalHost.getCanonicalHostName + ":" + WisebedController.port + "/controller/" + controllerid
 
   	
   
@@ -100,7 +102,7 @@ class WisebedController extends Controller {
 	val endpoints =  WisebedController.interfaces.flatMap(x => {
   	
 		   
-  			val url = "http://" + x + ":" + WisebedController.port + "/controller/" + WisebedController.id
+  			val url = "http://" + x + ":" + WisebedController.port + "/controller/" + controllerid
   			log.debug("Connecting to " + url)
   			try{
   				val ep = Endpoint.publish(url, WisebedController.this)
@@ -235,7 +237,7 @@ class WisebedController extends Controller {
 	def receiveStatus(@WebParam(name = "status", targetNamespace = "") status:java.util.List[RequestStatus]) {
 		//Send to dispetcher	
 		status.foreach( rs => {
-			log.trace("Got Message for {} - sending to Dispatcher", rs.getRequestId)
+			log.debug("Got Message for {} - sending to Dispatcher", rs.getRequestId)
 			sDisp ! rs	
 		})
 	}
@@ -280,7 +282,7 @@ class WisebedController extends Controller {
 object WisebedController{
 	private var intid = 1
 
-	private def id:String = {(intid +=1); intid.toString}
+	private def getUniqueID:String = {(intid +=1); intid.toString}
 
 	private var interfaces = {
 		val ifs = enumerationAsScalaIterator(NetworkInterface.getNetworkInterfaces)
