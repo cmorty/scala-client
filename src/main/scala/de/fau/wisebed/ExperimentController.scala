@@ -2,33 +2,28 @@ package de.fau.wisebed
 
 import java.lang.Override
 import java.net.InetAddress
+import java.net.NetworkInterface
 import java.net.ServerSocket
 import java.util.concurrent.Executors
+
+import scala.actors.DaemonActor
 import scala.collection.JavaConversions.asScalaBuffer
+import scala.collection.JavaConversions.enumerationAsScalaIterator
+import scala.collection.mutable.HashSet
+import scala.collection.mutable.ListMap
+import scala.collection.mutable.SynchronizedSet
+import scala.ref.WeakReference
+
 import org.slf4j.LoggerFactory
-import de.uniluebeck.itm.tr.util.UrlUtils
+
+import de.fau.wisebed.jobs.Job
+import de.fau.wisebed.messages.MessageInput
 import eu.wisebed.api.common.Message
 import eu.wisebed.api.controller.Controller
 import eu.wisebed.api.controller.RequestStatus
-import eu.wisebed.api.controller.Status
 import javax.jws.WebParam
 import javax.jws.WebService
 import javax.xml.ws.Endpoint
-import scala.collection.mutable.Buffer
-import scala.collection.mutable.SynchronizedBuffer
-import scala.collection.mutable.ListBuffer
-import scala.collection.mutable.ArrayBuffer
-import de.fau.wisebed.jobs.Job
-import scala.collection.mutable.SynchronizedMap
-import scala.collection.mutable.ListMap
-import scala.concurrent.SyncVar
-import scala.concurrent.Lock
-import scala.actors.Actor
-import de.fau.wisebed.messages.MessageInput
-import scala.ref.WeakReference
-import scala.collection.mutable.SynchronizedSet
-import scala.collection.mutable.HashSet
-import scala.actors.DaemonActor
 
 
 case object StopAct
@@ -91,20 +86,39 @@ private class MessageInputHolder(mi:MessageInput){
 class ExperimentController extends Controller {
 	
 	
-	
   	val log = LoggerFactory.getLogger(this.getClass)
 
   	val url = "http://" + InetAddress.getLocalHost.getCanonicalHostName + ":" + ExperimentController.port + "/controller/" + ExperimentController.id
-	val bindAllInterfacesUrl = UrlUtils.convertHostToZeros(url)
 
+  	
+  
 	log.debug("Starting ExperimentController...")
 	log.debug("Endpoint URL: {}", url)
-	log.debug("Binding  URL: {}", bindAllInterfacesUrl)
 
-	val endpoint = Endpoint.publish(bindAllInterfacesUrl, this)
-	endpoint.setExecutor(Executors.newCachedThreadPool())
+	
+	
+	val endpoints =  ExperimentController.interfaces.flatMap(x => {
+  	
+		   
+  			val url = "http://" + x + ":" + ExperimentController.port + "/controller/" + ExperimentController.id
+  			log.debug("Connecting to " + url)
+  			try{
+	  			val ep = Endpoint.publish(url, this)
+	  			ep.setExecutor(Executors.newCachedThreadPool)
+	  			List(ep)
+  			} catch {
+  				case e:Exception =>
+  					log.error("Failed to open " + url)
+  					List[Endpoint]() 
+  			}
+  			
+  		})
+  		
+  		
+  	
+	
 
-	log.debug("Successfully started ExperimentController at " + bindAllInterfacesUrl)
+	log.debug("Successfully started ExperimentControllers at " + url + " using ip(s): " + ExperimentController.interfaces.mkString(", "))
 	
 	private val messageHandlers = new HashSet[MessageInputHolder] with SynchronizedSet[MessageInputHolder]
 	var notificationCallbacks = List[String => Unit]()
@@ -254,6 +268,7 @@ class ExperimentController extends Controller {
 	def experimentEnded() {
 		for(cb <- endCallbacks) cb()
 		sDisp ! RemMesAll
+		endpoints.foreach(_.stop)
 	}
 
 	def onEnd(callback: => Unit) {
@@ -263,10 +278,21 @@ class ExperimentController extends Controller {
 
 
 object ExperimentController{
-	private var intid = 0
+	private var intid = 1
 
 	private def id:String = {(intid +=1); intid.toString}
+
+	private var interfaces = {
+		val ifs = enumerationAsScalaIterator(NetworkInterface.getNetworkInterfaces)
+		val addr = ifs.filter(x => {x.isUp && !x.isVirtual}).flatMap(_.getInetAddresses).toList
+		addr.filter(x => {!x.isLinkLocalAddress}).map( x => {
+			if(x.isInstanceOf[java.net.Inet6Address])	"[" + x.getHostAddress.takeWhile(_ != '%') + "]"
+			else x.getHostAddress
+		})
+	}
 	
+	private lazy val threadPool = Executors.newCachedThreadPool()
+
 	private lazy val port:Int = {
 		val socket = new ServerSocket(0)
 		val port = socket.getLocalPort()

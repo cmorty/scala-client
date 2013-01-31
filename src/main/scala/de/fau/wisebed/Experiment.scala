@@ -47,14 +47,9 @@ class Experiment (res:List[Reservation], implicit val tb:Testbed) {
 	}
 	controller.onEnd {
 		active = false
-		stopdel()
 		log.info("Experiment ended")
 	}
 
-	private def stopdel() {
-		/** @todo stop endpoint */ 
-		// controller.endpoint.stop()
-	} 
 	
 	log.debug("Local controller published on url: {}", controller.url)
 	
