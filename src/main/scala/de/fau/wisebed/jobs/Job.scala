@@ -1,6 +1,6 @@
 package de.fau.wisebed.jobs
 
-import scala.parallel.Future
+import scala.concurrent.Future
 import eu.wisebed.api.controller.Status
 import eu.wisebed.api.controller.RequestStatus
 import scala.actors.Actor
@@ -9,40 +9,38 @@ import scala.actors.TIMEOUT
 import scala.actors.OutputChannel
 import de.fau.wisebed.RemJob
 import de.fau.wisebed.StopAct
-
-class Holder[S] extends Future[S] {
-	private var res: Option[S] = None
-	private var waiting: Boolean = false
-
-	def isDone:Boolean = res != None
-
-	def set(r: S): Unit = synchronized {
-		res = Some(r)
-		if(waiting) notify()
-	}
-
-	def apply():S = synchronized {
-		waiting = true
-		if(!isDone) wait()
-		res.get
-	}
-}
+import scala.concurrent.Promise
+import scala.util.Success
+import scala.util.Failure
+import scala.util.Try
+import scala.concurrent.Await
+import scala.concurrent.duration.Duration
+import scala.concurrent.ExecutionContext
+import scala.concurrent.CanAwait
+import java.util.concurrent.TimeoutException
 
 abstract class Job[S](nodes: Seq[String]) extends Actor with Future[Map[String, S]] {
 	val log:Logger
 	
-	private[jobs] var states = Map[String, Holder[S]](nodes.map(_ -> new Holder[S]) : _*)
-
+	private val  prom =  Promise[Map[String, S]]()
+	
+	private[jobs] var states = Map[String, Promise[S]](nodes.map(_ -> Promise[S]()) : _*)
 	private[jobs] def update(node: String, v:Int, msg:String):Option[S]
 	
 	val successValue: S
 
-	def isDone:Boolean = states.values.forall(_.isDone)
+	private def isDone:Boolean = states.values.forall(_.isCompleted)
+	def isCompleted = prom.isCompleted
+	
+	def ready(atMost: Duration)(implicit permit: CanAwait): this.type = {
+	 	if(prom.future.ready(atMost).isCompleted) this
+	 	else throw new TimeoutException("Futures timed out after [" + atMost + "]")
+	}
 
 	def statusUpdate(s:Status) {
 		log.debug("Got state for " + s.getNodeId + ": " + s.getValue)
 		update(s.getNodeId, s.getValue, s.getMsg) match {
-			case Some(stat) => states(s.getNodeId).set(stat)
+			case Some(stat) => states(s.getNodeId).complete( new Success(stat))
 			case None => // no status update
 		}
 	}
@@ -53,7 +51,10 @@ abstract class Job[S](nodes: Seq[String]) extends Actor with Future[Map[String, 
 			react{				
 				case s:Status =>
 					statusUpdate(s)			
-					if(isDone) sender ! RemJob(this)
+					if(isDone) {
+						prom.complete(new Success(apply))  						
+						sender ! RemJob(this)
+					}
 				case StopAct =>
 					log.debug("Job actor stopped: {}", this.toString)
 					exit
@@ -63,11 +64,16 @@ abstract class Job[S](nodes: Seq[String]) extends Actor with Future[Map[String, 
 		}
 	}
 	
+	def result(atMost: Duration)(implicit permit: CanAwait) = prom.future.result(atMost)
+	def value = prom.future.value
+	def onComplete[U](func: (Try[Map[String, S]]) ⇒ U)(implicit executor: ExecutionContext) = prom.future.onComplete(func)
+	
 	def apply():Map[String, S] = {
-		states.mapValues(_.apply())
+		states.mapValues(x => {Await.result(x.future, Duration.Inf)})
 	}
 		
 	def status = apply
 
 	def success:Boolean = apply().values.forall(_ == successValue)
 }
+
