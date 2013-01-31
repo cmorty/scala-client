@@ -30,7 +30,7 @@ abstract class Job[S](nodes: Seq[String]) extends Actor with Future[Map[String, 
 	val successValue: S
 
 	private def isDone:Boolean = states.values.forall(_.isCompleted)
-	def isCompleted = prom.isCompleted
+	def isCompleted = prom.future.isCompleted
 	
 	def ready(atMost: Duration)(implicit permit: CanAwait): this.type = {
 	 	if(prom.future.ready(atMost).isCompleted) this

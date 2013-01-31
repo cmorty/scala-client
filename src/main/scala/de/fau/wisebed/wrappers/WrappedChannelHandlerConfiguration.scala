@@ -1,8 +1,8 @@
 package de.fau.wisebed.wrappers
 
+import scala.language.implicitConversions
+
 import eu.wisebed.api.wsn.ChannelHandlerConfiguration
-import de.fau.wisebed.WisebedApiConversions._
-import scala.collection.JavaConversions._
 
 class WrappedChannelHandlerConfiguration(chc:ChannelHandlerConfiguration = new ChannelHandlerConfiguration) {
 	val wconf = new WrappedKeyValuePairMap(chc.getConfiguration)

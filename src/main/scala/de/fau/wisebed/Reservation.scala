@@ -1,14 +1,17 @@
 package de.fau.wisebed
 
-import java.util.GregorianCalendar
-import scala.collection.mutable.Buffer
-import eu.wisebed.api._
-import javax.xml.datatype.DatatypeFactory
-import scala.collection.JavaConversions._
-import WisebedApiConversions._
-import javax.xml.datatype.XMLGregorianCalendar
 import java.text.SimpleDateFormat
+import java.util.GregorianCalendar
+
+import scala.collection.JavaConversions.seqAsJavaList
+import scala.collection.mutable.Buffer
+import scala.language.implicitConversions
+
 import org.slf4j.LoggerFactory
+
+import WisebedApiConversions.greg2XMLGreg
+import eu.wisebed.api.rs
+import eu.wisebed.api.sm
 
 class Reservation(_from:GregorianCalendar, _to:GregorianCalendar,_nodeURNs:Seq[String], user:String) {
 	val log = LoggerFactory.getLogger(this.getClass)

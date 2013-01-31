@@ -1,10 +1,16 @@
 package de.fau.wisebed
 
-import eu.wisebed.api._
-import scala.collection.JavaConversions._
 import java.util.GregorianCalendar
-import javax.xml.datatype.XMLGregorianCalendar
+
+import scala.collection.JavaConversions.seqAsJavaList
+import scala.language.implicitConversions
+
+import eu.wisebed.api.common
+import eu.wisebed.api.rs
+import eu.wisebed.api.snaa
 import javax.xml.datatype.DatatypeFactory
+import javax.xml.datatype.XMLGregorianCalendar
+
 
 object WisebedApiConversions {
 	implicit def kvp2map(kvp:List[common.KeyValuePair]):Map[String, String] = kvp.map(x => (x.getKey -> x.getValue)).toMap

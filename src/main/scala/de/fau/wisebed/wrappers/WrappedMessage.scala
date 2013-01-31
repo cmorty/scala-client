@@ -1,8 +1,12 @@
 package de.fau.wisebed.wrappers
 
-import eu.wisebed.api._
-import de.fau.wisebed.WisebedApiConversions._
 import java.util.GregorianCalendar
+
+import scala.Array.canBuildFrom
+import scala.language.implicitConversions
+
+import de.fau.wisebed.WisebedApiConversions.greg2XMLGreg
+import eu.wisebed.api.common
 
 class WrappedMessage (_msg:common.Message) {
 	def dataString = msg.getBinaryData.map(_.toChar).mkString

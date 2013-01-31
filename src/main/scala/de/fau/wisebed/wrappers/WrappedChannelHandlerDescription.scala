@@ -1,9 +1,12 @@
 package de.fau.wisebed.wrappers
 
-import eu.wisebed.api.wsn.ChannelHandlerDescription
-import scala.collection.JavaConversions._
+import scala.collection.JavaConversions.asScalaBuffer
+import scala.language.implicitConversions
+
 import org.slf4j.LoggerFactory
-import de.fau.wisebed.WisebedApiConversions._
+
+import de.fau.wisebed.WisebedApiConversions.kvp2map
+import eu.wisebed.api.wsn.ChannelHandlerDescription
 
 class WrappedChannelHandlerDescription(chd:ChannelHandlerDescription) {
 	val log = LoggerFactory.getLogger(WrappedChannelHandlerDescription.this.getClass)
