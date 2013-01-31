@@ -83,12 +83,12 @@ private class MessageInputHolder(mi:MessageInput){
 		portName = "ControllerPort",
 		endpointInterface = "eu.wisebed.api.controller.Controller"
 )
-class ExperimentController extends Controller {
+class WisebedController extends Controller {
 	
 	
-  	val log = LoggerFactory.getLogger(this.getClass)
+  	val log = LoggerFactory.getLogger(WisebedController.this.getClass)
 
-  	val url = "http://" + InetAddress.getLocalHost.getCanonicalHostName + ":" + ExperimentController.port + "/controller/" + ExperimentController.id
+  	val url = "http://" + InetAddress.getLocalHost.getCanonicalHostName + ":" + WisebedController.port + "/controller/" + WisebedController.id
 
   	
   
@@ -97,15 +97,15 @@ class ExperimentController extends Controller {
 
 	
 	
-	val endpoints =  ExperimentController.interfaces.flatMap(x => {
+	val endpoints =  WisebedController.interfaces.flatMap(x => {
   	
 		   
-  			val url = "http://" + x + ":" + ExperimentController.port + "/controller/" + ExperimentController.id
+  			val url = "http://" + x + ":" + WisebedController.port + "/controller/" + WisebedController.id
   			log.debug("Connecting to " + url)
   			try{
-	  			val ep = Endpoint.publish(url, this)
-	  			ep.setExecutor(Executors.newCachedThreadPool)
-	  			List(ep)
+  				val ep = Endpoint.publish(url, WisebedController.this)
+  				ep.setExecutor(Executors.newCachedThreadPool)
+  				List(ep)
   			} catch {
   				case e:Exception =>
   					log.error("Failed to open " + url)
@@ -118,7 +118,7 @@ class ExperimentController extends Controller {
   	
 	
 
-	log.debug("Successfully started ExperimentControllers at " + url + " using ip(s): " + ExperimentController.interfaces.mkString(", "))
+	log.debug("Successfully started ExperimentControllers at " + url + " using ip(s): " + WisebedController.interfaces.mkString(", "))
 	
 	private val messageHandlers = new HashSet[MessageInputHolder] with SynchronizedSet[MessageInputHolder]
 	var notificationCallbacks = List[String => Unit]()
@@ -277,7 +277,7 @@ class ExperimentController extends Controller {
 }
 
 
-object ExperimentController{
+object WisebedController{
 	private var intid = 1
 
 	private def id:String = {(intid +=1); intid.toString}

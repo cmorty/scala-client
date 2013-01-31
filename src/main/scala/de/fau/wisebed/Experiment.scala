@@ -36,7 +36,7 @@ class Experiment (res:List[Reservation], implicit val tb:Testbed) {
 
 	var active = true
 
-	val controller = new ExperimentController
+	val controller = new WisebedController
 
 	if(log.isTraceEnabled){
 		val msghndl = new MessageLogger(mi => {

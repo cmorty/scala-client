@@ -43,7 +43,7 @@ class Testbed(val smEndpointURL:String) {
 	var currentWSNService:wsn.WSN = null
 	
 	lazy val controller = {
-		val ec = new ExperimentController
+		val ec = new WisebedController
 		log.debug("Local Testbed-controller published on url: {}", ec.url)
 		ec
 	}
