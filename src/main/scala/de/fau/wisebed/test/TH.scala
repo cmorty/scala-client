@@ -49,6 +49,11 @@ object TH {
 	//Get Motes
 	log.debug("Starting Testbed")
 	val tb = new Testbed(smEndpointURL)
+	log.debug("snaaEndpointURL: " + tb.snaaEndpointURL)
+	log.debug("rsEndpointURL: " + tb.rsEndpointURL)
+	log.debug("Conf: " + tb.serverconf.conf.map(x => {x.getKey + ": " +x.getValue}).mkString(", "))
+	
+	
 	log.debug("Requesting Motes")
 	val motes = tb.getnodes()
 	log.debug("Motes: " + motes.mkString(", "))

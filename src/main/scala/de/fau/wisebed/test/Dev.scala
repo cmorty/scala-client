@@ -54,12 +54,18 @@ object Dev {
 		log.debug("Conf: " + tb.serverconf.conf.map(x => {x.getKey + ": " +x.getValue}).mkString(", "))
 		
 		
+		//log.debug("Network: " + tb.getNetwork)
+		
 		log.debug("Requesting Motes")
 		val motes = tb.getnodes()
 		log.debug("Motes: " + motes.mkString(", "))
-		
-		
-		
+		try {
+			val alivem = tb.areNodesAlive(motes)()
+			log.debug("Motestates: " + alivem.map(x => {x._1 + ": " +x._2}).mkString(", "))
+		} catch {
+			case e: Exception => println("exception caught: " + e.printStackTrace())
+			Thread.sleep(1000*600)
+		} 
 		
 	}
 }
