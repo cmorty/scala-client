@@ -137,7 +137,7 @@ class WisebedController extends Controller {
   		
   		private def sendJob(rs:RequestStatus){
   			jobs.get(rs.getRequestId) match {
-				case x:Some[Job[_]] => rs.getStatus.foreach(s => {x.get ! s ; log.trace("Dispatching {}", rs.getRequestId) }) //Send to Job
+				case x:Some[_] => rs.getStatus.foreach(s => {x.get ! s ; log.trace("Dispatching {}", rs.getRequestId) }) //Send to Job
 				case _ => { 
 					if(rjob > 0){
 						rsBuf ::= rs
