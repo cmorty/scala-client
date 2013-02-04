@@ -68,6 +68,9 @@ object TH {
 	log.debug("Logging in")
 	tb.addCredencials(prefix, login, pass)
 	
+	/**
+	 * @param resTime Reserve nodes for a certain amount of time.
+	 */
 	def init(resTime:Int){
 		log.debug("Requesting reservations")
 		res = tb.getReservations(resTime)
@@ -81,7 +84,7 @@ object TH {
 			val from = new GregorianCalendar
 			from.add(Calendar.MINUTE, -1)
 			val to = new GregorianCalendar
-			to.add(Calendar.MINUTE, 120)
+			to.add(Calendar.MINUTE, resTime)
 			val r = tb.makeReservation(from, to, motes, "morty")
 			log.debug("Got Reservations: \n" +  r.dateString() + " for " + r.getNodeURNs.mkString(", ")) 
 			res ::= r
