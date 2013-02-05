@@ -66,7 +66,7 @@ class Testbed(val smEndpointURL:String) {
 	/**
 	 * Forward wrapper to wiseML.getNodeUrns
 	 */
-	def getNodes(moteType:Seq[String]):List[String] =  wiseML.getNodeUrns(moteType)
+	def getNodes(moteType:String*):List[String] =  wiseML.getNodeUrns(moteType)
 	def getNodes():List[String] =  wiseML.getNodeUrns()
 	
 	def addCredencials(auth:AuthenticationTriple) {

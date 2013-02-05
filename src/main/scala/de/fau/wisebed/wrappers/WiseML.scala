@@ -21,7 +21,7 @@ class WiseML(serializedWiseML:String) {
 	
 	def getNodes(types:Seq[String] = null):List[Setup.Node] = {	
 		if (types == null || types.isEmpty) wiseml.getSetup.getNode.toList
-		else wiseml.getSetup.getNode.filter(x => {val id = x.getId; types.find(_.equalsIgnoreCase(id)) != None}).toList		
+		else wiseml.getSetup.getNode.filter(x => {val id = x.getNodeType(); types.find(_.equalsIgnoreCase(id)) != None}).toList		
 	}
 	/**
 	 * Allows passing a list rather than a Seq.

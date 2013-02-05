@@ -237,7 +237,7 @@ class WisebedController extends Controller {
 	def receiveStatus(@WebParam(name = "status", targetNamespace = "") status:java.util.List[RequestStatus]) {
 		//Send to dispetcher	
 		status.foreach( rs => {
-			log.debug("Got Message for {} - sending to Dispatcher", rs.getRequestId)
+			log.trace("Got Message for {} - sending to Dispatcher", rs.getRequestId)
 			sDisp ! rs	
 		})
 	}
