@@ -98,6 +98,7 @@ class Testbed(val smEndpointURL:String) {
 	def getReservations(min:Int = 30):List[Reservation] = {
 		val from = new GregorianCalendar
 		val to = new GregorianCalendar
+		from.add(Calendar.MINUTE, -1)
 		to.add(Calendar.MINUTE, min)
 		getReservations(from, to)
 	}
