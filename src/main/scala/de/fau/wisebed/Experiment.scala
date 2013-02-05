@@ -32,11 +32,12 @@ case class ExperimentEndedException(t:String) extends Exception(t)
  * @todo There is a concurrency issue if a message is received before the id is added to the jobmap (this is unlikely, though)
  */	
 class Experiment (res:List[Reservation], implicit val tb:Testbed) {
-	val log = LoggerFactory.getLogger(this.getClass)
+	protected val log = LoggerFactory.getLogger(this.getClass)
 
 	var active = true
+	def active_ (x:Boolean) {} //Null Setter
 
-	val controller = new WisebedController
+	protected val controller = new WisebedController
 
 	if(log.isTraceEnabled){
 		val msghndl = new MessageLogger(mi => {
@@ -53,7 +54,7 @@ class Experiment (res:List[Reservation], implicit val tb:Testbed) {
 	
 	log.debug("Local controller published on url: {}", controller.url)
 	
-	val wsnService:wsn.WSN = {	
+	protected val wsnService:wsn.WSN = {	
 		val keys: Seq[eu.wisebed.api.sm.SecretReservationKey] = res.map(_.secretReservationKeys).flatten
 		
 		val wsnEndpointURL = tb.sessionManagement.getInstance(keys, controller.url)

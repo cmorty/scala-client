@@ -13,18 +13,44 @@ import javax.xml.datatype.DatatypeFactory
 import scala.collection.JavaConversions._
 import WisebedApiConversions._
 import eu.wisebed.api.common.KeyValuePair
+import de.fau.wisebed.wrappers.WiseML
 
 
 class Serverconf(val snaaEndpointURL:String, val rsEndpointURL:String, val conf:List[KeyValuePair])
 
 class Testbed(val smEndpointURL:String) {
-	val log = LoggerFactory.getLogger(this.getClass)
+	protected val log = LoggerFactory.getLogger(this.getClass)
 
-	var credentials = List[snaa.AuthenticationTriple]()
-	var secretAuthenticationKeys = Set[snaa.SecretAuthenticationKey]()
-	var reservations = List[Reservation]()
+	protected var credentials = List[snaa.AuthenticationTriple]()
+	protected var secretAuthenticationKeys = Set[snaa.SecretAuthenticationKey]()
 	
-	lazy val sessionManagement = WisebedServiceHelper.getSessionManagementService(smEndpointURL)
+	
+	protected[wisebed] lazy val sessionManagement = WisebedServiceHelper.getSessionManagementService(smEndpointURL)
+	/**
+	 * The configuration of the server
+	 */
+
+	protected lazy val authenticationSystem = WisebedServiceHelper.getSNAAService(snaaEndpointURL)
+	protected lazy val reservationSystem = WisebedServiceHelper.getRSService(rsEndpointURL)
+	
+	protected lazy val controller = {
+		val ec = new WisebedController
+		log.debug("Local Testbed-controller published on url: {}", ec.url)
+		ec
+	}
+	
+	protected def getReservations(reservation: rs.GetReservations):List[Reservation] = {
+		reservationSystem.getConfidentialReservations(secretAuthenticationKeys.toSeq, reservation).toList.map { res =>
+			val tmp = new Reservation(res.getFrom.toGregorianCalendar, res.getTo.toGregorianCalendar, res.getNodeURNs.toList, res.getUserData)
+			tmp.addKeys(asScalaBuffer(res.getData))
+			tmp
+		}
+	}
+	
+	
+	//Public Variables
+	lazy val wiseML = new WiseML(sessionManagement.getNetwork)
+	
 	lazy val serverconf:Serverconf = {
 		val rs = new javax.xml.ws.Holder[String]
 		val snaa = new javax.xml.ws.Holder[String]
@@ -34,24 +60,14 @@ class Testbed(val smEndpointURL:String) {
 	}
 	lazy val snaaEndpointURL:String = serverconf.snaaEndpointURL
 	lazy val rsEndpointURL:String = serverconf.rsEndpointURL
-	lazy val authenticationSystem = WisebedServiceHelper.getSNAAService(snaaEndpointURL)
-	lazy val reservationSystem = WisebedServiceHelper.getRSService(rsEndpointURL)
 	
 	
-
-	lazy val wiseML = sessionManagement.getNetwork
-	var currentWSNService:wsn.WSN = null
-	
-	lazy val controller = {
-		val ec = new WisebedController
-		log.debug("Local Testbed-controller published on url: {}", ec.url)
-		ec
-	}
-	
-	// Public funcions
-	def getnodes(moteType:Seq[String] = List("telosb")):List[String] = {
-		WiseMLHelper.getNodeUrns(wiseML, moteType).toList
-	}
+	// Public functions
+	/**
+	 * Forward wrapper to wiseML.getNodeUrns
+	 */
+	def getNodes(moteType:Seq[String]):List[String] =  wiseML.getNodeUrns(moteType)
+	def getNodes():List[String] =  wiseML.getNodeUrns()
 	
 	def addCredencials(auth:AuthenticationTriple) {
 		credentials ::= auth
@@ -71,14 +87,7 @@ class Testbed(val smEndpointURL:String) {
 		secretAuthenticationKeys ++= authklist
 	}
 	
-	private def getReservations(reservation: rs.GetReservations):List[Reservation] = {
-		reservationSystem.getConfidentialReservations(secretAuthenticationKeys.toSeq, reservation).toList.map { res =>
-			val tmp = new Reservation(res.getFrom.toGregorianCalendar, res.getTo.toGregorianCalendar, res.getNodeURNs.toList, res.getUserData)
-			tmp.addKeys(asScalaBuffer(res.getData))
-			tmp
-		}
-	}
-	
+
 	def getReservations(from:GregorianCalendar, to:GregorianCalendar):List[Reservation] = {
 		val res = new rs.GetReservations
 		res.setFrom(from)
@@ -119,8 +128,6 @@ class Testbed(val smEndpointURL:String) {
 	def getNetwork():String = {
 		sessionManagement.getNetwork()
 	}
-	
-	private def getConfiguration:Serverconf = serverconf
 	
 	
 }

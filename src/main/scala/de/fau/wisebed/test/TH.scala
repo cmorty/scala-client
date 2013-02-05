@@ -55,7 +55,7 @@ object TH {
 	
 	
 	log.debug("Requesting Motes")
-	val motes = tb.getnodes()
+	val motes = tb.getNodes()
 	log.debug("Motes: " + motes.mkString(", "))
 	
 	/* FIXME: This does not work!
