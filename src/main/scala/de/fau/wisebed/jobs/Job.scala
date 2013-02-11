@@ -24,7 +24,7 @@ abstract class Job[S](nodes: Seq[String]) extends Actor with Future[Map[String, 
 	
 	private val  prom =  Promise[Map[String, S]]()
 	
-	private[jobs] var states = Map[String, Promise[S]](nodes.map(_ -> Promise[S]()) : _*)
+	private[jobs] val states = Map[String, Promise[S]](nodes.map(_ -> Promise[S]()) : _*)
 	private[jobs] def update(node: String, v:Int, msg:String):Option[S]
 	
 	val successValue: S
@@ -40,7 +40,10 @@ abstract class Job[S](nodes: Seq[String]) extends Actor with Future[Map[String, 
 	def statusUpdate(s:Status) {
 		log.debug("Got state for " + s.getNodeId + ": " + s.getValue)
 		update(s.getNodeId, s.getValue, s.getMsg) match {
-			case Some(stat) => states(s.getNodeId).complete( new Success(stat))
+			case Some(stat) => {
+				if(!states.contains(s.getNodeId)) log.error("Got answer for unrequested node: " + s.getNodeId) 
+				else states(s.getNodeId).complete( new Success(stat))
+			}
 			case None => // no status update
 		}
 	}

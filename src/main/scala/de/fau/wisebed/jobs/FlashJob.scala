@@ -29,9 +29,10 @@ class FlashJob(nodes:Seq[String]) extends Job[MoteFlashState](nodes) {
 				log.warn("Mote " + node + " not found")
 				Some(NotFound)
 			case 100 =>
-				Some(OK)
+				log.info("Finished flashing node " + node)
+				Some(OK)				
 			case n if n >= 0 && n  < 100 =>
-				log.info("Flashing mote " + node + " " + v + "%")
+				log.debug("Flashing note " + node + " " + v + "%")
 				None
 			case n => log.warn("Failed to Flash node {}: {}", node, msg )
 				Some(Error)
