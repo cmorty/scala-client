@@ -124,7 +124,7 @@ class WisebedController extends Controller {
 	
 	private val messageHandlers = new HashSet[MessageInputHolder] with SynchronizedSet[MessageInputHolder]
 	var notificationCallbacks = List[String => Unit]()
-	var endCallbacks = List[() => Unit]()
+	var endCallbacks = List[ () => Unit]()
 	
 	
 	/*
@@ -274,7 +274,7 @@ class WisebedController extends Controller {
 	}
 
 	def onEnd(callback: => Unit) {
-		endCallbacks ::= ( () => callback )
+		endCallbacks ::=  callback _
 	}
 }
 
@@ -286,11 +286,18 @@ object WisebedController{
 
 	private var interfaces = {
 		val ifs = enumerationAsScalaIterator(NetworkInterface.getNetworkInterfaces)
-		val addr = ifs.filter(x => {x.isUp && !x.isVirtual}).flatMap(_.getInetAddresses).toList
-		addr.filter(x => {!x.isLinkLocalAddress}).map( x => {
+		val addr = ifs.filter(x => {x.isUp && !x.isVirtual && !x.isLoopback()}).flatMap(_.getInetAddresses).toList
+		val ext =  addr.filter(x => {!x.isLinkLocalAddress}).map( x => {
 			if(x.isInstanceOf[java.net.Inet6Address])	"[" + x.getHostAddress.takeWhile(_ != '%') + "]"
 			else x.getHostAddress
-		})
+		}) 
+		val local =  InetAddress.getAllByName(InetAddress.getLocalHost.getCanonicalHostName).map(_.getHostAddress)
+		
+		ext ++ local
+		
+		
+		
+		
 	}
 	
 	private lazy val threadPool = Executors.newCachedThreadPool()
