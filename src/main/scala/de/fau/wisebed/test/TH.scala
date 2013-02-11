@@ -107,9 +107,10 @@ object TH {
 		
 		log.debug("Requesting Supported Channel Handlers")
 		val handls = exp.supportedChannelHandlers
-		for(h <- handls){
-			println(h.format)
-		}
+		if(false)
+			for(h <- handls){
+				println(h.format)
+			}
 		
 		val setHand = "contiki"
 		
