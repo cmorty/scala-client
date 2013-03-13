@@ -76,7 +76,10 @@ abstract class Job[S](nodes: Seq[String]) extends Actor with Future[Map[String, 
 	}
 		
 	def status = apply
-
+	
+	/**
+	 * Waits for the result and returns whether the job was successfull.
+	 */
 	def success:Boolean = apply().values.forall(_ == successValue)
 }
 
