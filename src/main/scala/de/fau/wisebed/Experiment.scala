@@ -17,6 +17,8 @@ import java.util.Date
 import de.fau.wisebed.WisebedApiConversions._
 import de.fau.wisebed.messages.MsgLiner
 import de.fau.wisebed.messages.MessageLogger
+import java.io.InputStream
+import eu.wisebed.api.wsn.Program
 
 class MoteMessage(val node:String, val data:Array[Byte], val time:GregorianCalendar) {
 	def this (m:common.Message){
@@ -66,24 +68,29 @@ class Experiment (res:List[Reservation], implicit val tb:Testbed) {
 	
 	//----------------------- Jobs --------------------------------------------------------
 	
-	def flash(file:String, nodes:Seq[String]):FlashJob = {
-		if(active == false) throw new ExperimentEndedException("Can not flash nodes, as the experiment ended")
-		val prog = RichProgram(file)
+	private def requireActive = if(!active) throw new ExperimentEndedException("Can not flash nodes, as the experiment ended")
+	
+	def flash(prog:Program, nodes:Seq[String]):FlashJob = {
+		requireActive
 		val map = List.fill(nodes.size){new java.lang.Integer(0)}
 		val job = new FlashJob(nodes)
 		controller.addJob(job, wsnService.flashPrograms(nodes, map, List(prog)))
 		job	
 	}
 	
+	def flash(file:InputStream, nodes:Seq[String]):FlashJob = flash(RichProgram.loadStream(file), nodes)
+	
+	def flash(file:String, nodes:Seq[String]):FlashJob = flash(RichProgram(file), nodes)
+	
 	def areNodesAlive(nodes:Seq[String]):NodesAliveJob = {
-		if(active == false) throw new ExperimentEndedException("Can not access nodes, as the experiment ended")
+		requireActive
 		val job = new NodesAliveJob(nodes)
 		controller.addJob(job, wsnService.areNodesAlive(nodes))
 		job
 	}
 	
 	def resetNodes(nodes:Seq[String]):NodeOkFailJob = {
-		if(active == false) throw new ExperimentEndedException("Can not reset nodes, as the experiment ended")
+		requireActive
 		val job = new NodeOkFailJob("reset", nodes)
 		controller.addJob(job, wsnService.resetNodes(nodes))
 		job
@@ -92,7 +99,7 @@ class Experiment (res:List[Reservation], implicit val tb:Testbed) {
 	def send(node:String,data:String):NodeOkFailJob = send(List(node), data)
 	
 	def send(nodes:Seq[String], data:String):NodeOkFailJob = {
-		if(active == false) throw new ExperimentEndedException("Can not send data to nodes, as the experiment ended")
+		requireActive
 		val job = new NodeOkFailJob("send" , nodes)
 		val msg = new common.Message
 		msg.setBinaryData(data.toArray.map(_.toByte))
@@ -103,7 +110,7 @@ class Experiment (res:List[Reservation], implicit val tb:Testbed) {
 	}
 	
 	def setChannelHandler(nodes:Seq[String], cnf:wsn.ChannelHandlerConfiguration):NodeOkFailJob = {
-		if(active == false) throw new ExperimentEndedException("Can not set channel handler, as the experiment ended")
+		requireActive
 		val cn = List.fill(nodes.size){cnf}
 		val job =  new NodeOkFailJob("setChannelHandler", nodes)
 		controller.addJob(job,wsnService.setChannelPipeline(nodes, cn))
