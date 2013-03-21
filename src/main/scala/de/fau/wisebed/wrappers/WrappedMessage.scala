@@ -12,7 +12,7 @@ class WrappedMessage (_msg:common.Message) {
 	def dataString = msg.getBinaryData.map(_.toChar).mkString
 	def dataString_=(data:String)=msg.setBinaryData(data.map(_.toByte).toArray)
 	
-	def data = msg.getBinaryData
+	def data:Array[Byte] = msg.getBinaryData
 	def data_= (data:Array[Byte]) = msg.setBinaryData(data)
 	
 	def node = msg.getSourceNodeId
