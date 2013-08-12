@@ -1,9 +1,6 @@
 package de.fau.wisebed.test
 
 import org.slf4j.LoggerFactory
-import de.fau.wisebed.messages.MessageWaiter
-import de.uniluebeck.itm.tr.util.Logging
-import org.apache.log4j.Level
 
 object ListNodes {
 	val log = LoggerFactory.getLogger(getClass)

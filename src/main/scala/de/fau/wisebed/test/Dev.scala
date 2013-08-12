@@ -1,30 +1,23 @@
 package de.fau.wisebed.test
 
-
-import de.uniluebeck.itm.tr.util.Logging
 import java.io.File
-import org.apache.log4j.Level
-import org.slf4j.LoggerFactory
+
 import scala.xml.XML
-import de.fau.wisebed.Testbed
-import java.util.GregorianCalendar
-import java.util.Calendar
-import de.fau.wisebed.Reservation.reservation2CRD
-import scala.collection.JavaConversions.asScalaBuffer
-import scala.collection.JavaConversions._
+
+import org.slf4j.LoggerFactory
+
 import de.fau.wisebed.Experiment
-import de.fau.wisebed.messages.MessageLogger
-import de.fau.wisebed.messages.MsgLiner
-import de.fau.wisebed.messages.MessageLogger
-import de.fau.wisebed.wrappers
-import de.fau.wisebed.jobs.MoteAliveState._
-import de.fau.wisebed.wrappers.WrappedChannelHandlerConfiguration
 import de.fau.wisebed.Reservation
+import de.fau.wisebed.Testbed
+import de.fau.wisebed.util.Logging.setDefaultLogger
 
 
 object Dev {
 	def main(args: Array[String]) {
-		Logging.setLoggingDefaults(Level.DEBUG) // new PatternLayout("%-11d{HH:mm:ss,SSS} %-5p - %m%n"))
+		//Logging.setLoggingDefaults(Level.DEBUG) // new PatternLayout("%-11d{HH:mm:ss,SSS} %-5p - %m%n"))
+		
+		setDefaultLogger
+		//Logger.getRootLogger().addAppender(new ConsoleAppender(layout));
 
 		var activemotes: List[String] = null
 		var exp: Experiment = null

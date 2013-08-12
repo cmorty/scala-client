@@ -1,28 +1,32 @@
 package de.fau.wisebed.test
 
-import de.uniluebeck.itm.tr.util.Logging
 import java.io.File
-import org.apache.log4j.Level
-import org.slf4j.LoggerFactory
-import scala.xml.XML
-import de.fau.wisebed.Testbed
-import java.util.GregorianCalendar
 import java.util.Calendar
-import de.fau.wisebed.Reservation.reservation2CRD
+import java.util.GregorianCalendar
+
 import scala.collection.JavaConversions.asScalaBuffer
-import scala.collection.JavaConversions._
+import scala.collection.JavaConversions.mapAsScalaMap
+import scala.xml.XML
+
+import org.slf4j.LoggerFactory
+
 import de.fau.wisebed.Experiment
+import de.fau.wisebed.Reservation
+import de.fau.wisebed.Reservation.reservation2CRD
+import de.fau.wisebed.Testbed
+import de.fau.wisebed.jobs.MoteAliveState.Alive
 import de.fau.wisebed.messages.MessageLogger
 import de.fau.wisebed.messages.MsgLiner
-import de.fau.wisebed.messages.MessageLogger
-import de.fau.wisebed.wrappers
-import de.fau.wisebed.jobs.MoteAliveState._
 import de.fau.wisebed.wrappers.WrappedChannelHandlerConfiguration
-import de.fau.wisebed.Reservation
+import de.fau.wisebed.wrappers.WrappedChannelHandlerConfiguration.wchc2chc
+import de.fau.wisebed.wrappers.WrappedMessage.msg2wmsg
 
 
 object TH {
-	Logging.setLoggingDefaults(Level.DEBUG) // new PatternLayout("%-11d{HH:mm:ss,SSS} %-5p - %m%n"))
+	//Add handler to shut down everything in case of an accident
+	val handler = new ExHandler();
+	Thread.setDefaultUncaughtExceptionHandler(handler);
+
 
 	var activemotes:List[String] = null
 	var exp:Experiment = null
@@ -94,7 +98,7 @@ object TH {
 		
 		
 		exp.addMessageInput(  new MessageLogger(mi => {
-			import wrappers.WrappedMessage._
+			import de.fau.wisebed.wrappers.WrappedMessage._
 			log.info("Got message from " + mi.node + ": " + mi.dataString)
 		}) with MsgLiner)
 		
@@ -163,6 +167,15 @@ object TH {
         }
 		
 	}
-	
-	
 }
+
+
+class ExHandler extends Thread.UncaughtExceptionHandler {
+  def uncaughtException( t:Thread,  e:Throwable) {
+  	System.err.println("Throwable: " + e.getMessage());
+    System.err.println(t.toString());
+    System.err.println("Terminating");
+    sys.exit(1)
+  }
+}
+
