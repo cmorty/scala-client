@@ -30,7 +30,7 @@ object Flash {
 
 		
 		log.debug("Waiting for bootup")
-		if(! bw.waitTimeout(10*1000)){
+		if(! bw.waitResult(10*1000)){
 			log.error("Boot failed");
 			sys.exit(1)
 		}
