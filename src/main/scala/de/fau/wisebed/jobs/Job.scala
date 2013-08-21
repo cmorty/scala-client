@@ -38,7 +38,7 @@ abstract class Job[S](nodes: Seq[String]) extends Actor with Future[Map[String, 
 	}
 
 	def statusUpdate(s:Status) {
-		log.debug("Got state for " + s.getNodeId + ": " + s.getValue)
+		log.trace("Got state for " + s.getNodeId + ": " + s.getValue)
 		update(s.getNodeId, s.getValue, s.getMsg) match {
 			case Some(stat) => {
 				if(!states.contains(s.getNodeId)) log.error("Got answer for unrequested node: " + s.getNodeId) 
