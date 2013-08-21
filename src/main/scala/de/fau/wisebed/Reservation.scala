@@ -30,7 +30,7 @@ class Reservation(_from:GregorianCalendar, _to:GregorianCalendar,_nodeURNs:Seq[S
 	def inThePast = to.before(new GregorianCalendar)    
 	def now = {
 		val t = new GregorianCalendar
-		from.before(t) && to.after(t)
+		lfrom.before(t) && lto.after(t)
 	}
 
 	def addKeys(keys:Iterable[rs.SecretReservationKey]):Unit = {
@@ -47,7 +47,7 @@ class Reservation(_from:GregorianCalendar, _to:GregorianCalendar,_nodeURNs:Seq[S
 	}
 
 	def copy():Reservation = {
- 		val rv = new Reservation(from, to, nodeURNs, user)
+ 		val rv = new Reservation(lfrom, lto, nodeURNs, user)
  		rv.addKeys(secretReservationKeys)
  		rv
  	}
