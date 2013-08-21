@@ -10,22 +10,25 @@ import scala.collection.mutable
 import org.slf4j.LoggerFactory
 import java.util.Date
 import scala.concurrent.Await
-import scala.concurrent.duration.Duration
+import scala.concurrent.duration._
 import scala.concurrent.CanAwait
 import scala.util.Try
 import scala.concurrent.ExecutionContext
 import java.util.concurrent.TimeoutException
+import scala.util.Success
+import scala.util.Failure
+
 
 
 
 /**
+ * Waits for all Node the send a certain Message
  * @param nodes The nodes to monitor
  * @param needle The string to wait for. This may be multiline 
- *
  */
-class MessageWaiter(nodes:Iterable[String], needle:String) extends MessageInput with Future[Boolean]{
+class MessageWaiter(nodes:Iterable[String], needle:String) extends MessageInput with Future[Unit]{
 	
-	val prom = Promise[Boolean]()
+	val prom = Promise[Unit]()
 	
 	val log = LoggerFactory.getLogger(this.getClass) 
 	private var stop = false
@@ -40,20 +43,42 @@ class MessageWaiter(nodes:Iterable[String], needle:String) extends MessageInput 
 	
 	override def isWeak = true
 	
-	def apply():Boolean = Await.result(prom.future, Duration.Inf)
 	
-	def waitTimeout(timeout:Int):Boolean = synchronized{
-		def date = (new Date).getTime
-		var ctime:Long = date
-		val time:Long = ctime + timeout
-		while( {ctime = date; ctime} < time && !isDone) wait(time - ctime)
-		isOK
+	/**
+	 * @param atMost The maximum time to wait
+	 * @return True on success, false if times out.
+	 */
+	def result(atMost: Duration)(implicit permit: CanAwait) = prom.future.result(atMost)
+	
+	def waitResult(atMost: Duration):Boolean = {
+		try {
+			Await.result(prom.future, atMost)
+			isOK
+		} catch {
+			case e: TimeoutException => false
+			case e: Exception => throw e
+		}
 	}
 	
+	
+	
+	
+	/**
+	 * @param time The maximum time to wait in milliseconds
+	 * @return True on success, false if times out.
+	 */
+	def waitResult(milliseconds: Long):Boolean = waitResult(Duration(milliseconds, MILLISECONDS))
+	
+	def apply():Boolean = waitResult(Duration.Inf)
+	
+	
 	def unregister = synchronized {
+		prom.complete({if(isOK) new Success() else new Failure(new Exception("Stopped before finished"))})
+		log.info("Finished promise! with: " + isOK)
 		stop = true
 		notify
 		stopIntput
+		
 	}
 	
 	
@@ -72,9 +97,9 @@ class MessageWaiter(nodes:Iterable[String], needle:String) extends MessageInput 
 		}		
 	}
 	
-	def result(atMost: Duration)(implicit permit: CanAwait) = prom.future.result(atMost)
-	def value = prom.future.value
-	def onComplete[U](func: (Try[Boolean]) ⇒ U)(implicit executor: ExecutionContext) = prom.future.onComplete(func)
+	
+	def value =  prom.future.value
+	def onComplete[U](func: (Try[Unit]) ⇒ U)(implicit executor: ExecutionContext) = prom.future.onComplete(func)
 	def isCompleted = prom.future.isCompleted
 	
 	def ready(atMost: Duration)(implicit permit: CanAwait): this.type = {
