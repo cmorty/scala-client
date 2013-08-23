@@ -4,11 +4,11 @@ import eu.wisebed.api.controller.Status
 import scala.collection._
 import org.slf4j.LoggerFactory
 
-object MoteFlashState extends Enumeration {
-	type MoteFlashState = Value
+object NodeFlashState extends Enumeration {
+	type NodeFlashState = Value
 	val OK, NotFound, InProgress, Unknown, Error  = Value
 
-	def idToEnum(id:Int):MoteFlashState = id match {
+	def idToEnum(id:Int):NodeFlashState = id match {
 		case 100  => OK
 		case -2  => NotFound
 		case -1 => Error
@@ -16,9 +16,9 @@ object MoteFlashState extends Enumeration {
 		case n  => Error 
 	}
 }
-import MoteFlashState._
+import NodeFlashState._
 
-class FlashJob(nodes:Seq[String]) extends Job[MoteFlashState](nodes) {
+class FlashJob(nodes:Seq[String]) extends Job[NodeFlashState](nodes) {
 	val log = LoggerFactory.getLogger(this.getClass)
 
 	val successValue = OK
@@ -26,7 +26,7 @@ class FlashJob(nodes:Seq[String]) extends Job[MoteFlashState](nodes) {
 	def update(node:String, v:Int, msg:String) = {
 		v match {				
 			case -2  =>	
-				log.warn("Mote " + node + " not found")
+				log.warn("Node " + node + " not found")
 				Some(NotFound)
 			case 100 =>
 				log.info("Finished flashing node " + node)

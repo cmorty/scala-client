@@ -5,7 +5,7 @@ import scala.concurrent.Promise
 import eu.wisebed.api._
 import scala.collection.mutable
 import eu.wisebed.api.common.Message
-import de.fau.wisebed.wrappers.WrappedMessage._
+import de.fau.wisebed.WisebedApiConversions._
 import scala.collection.mutable
 import org.slf4j.LoggerFactory
 import java.util.Date
@@ -24,7 +24,7 @@ import scala.util.Failure
 /**
  * Waits for all Node the send a certain Message
  * @param nodes The nodes to monitor
- * @param needle The string to wait for. This may be multiline 
+ * @param needle The string to wait for. This may be multi line 
  */
 class MessageWaiter(nodes:Iterable[String], needle:String) extends MessageInput with Future[Unit]{
 	
@@ -98,7 +98,7 @@ class MessageWaiter(nodes:Iterable[String], needle:String) extends MessageInput 
 	}
 	
 	
-	def value =  prom.future.value
+	def value:Option[Try[Unit]] =  prom.future.value
 	def onComplete[U](func: (Try[Unit]) ⇒ U)(implicit executor: ExecutionContext) = prom.future.onComplete(func)
 	def isCompleted = prom.future.isCompleted
 	

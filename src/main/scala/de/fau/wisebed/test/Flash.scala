@@ -24,7 +24,7 @@ object Flash {
 		TH.flash("sky-shell.ihex")
 		
 		
-		val bw = new MessageWaiter(TH.activemotes,  "Contiki>")
+		val bw = new MessageWaiter(TH.activeNodes,  "Contiki>")
 		TH.exp.addMessageInput(bw)
 		
 

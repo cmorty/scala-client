@@ -8,8 +8,8 @@ object ListNodes {
 	def main(args: Array[String]) {
 		TH.init(2)
 
-		val inact = TH.motes.filter(!TH.activemotes.contains(_))
-		log.info("Aktive Nodes  : " +  TH.activemotes.mkString(", "))
+		val inact = TH.nodes.filter(!TH.activeNodes.contains(_))
+		log.info("Aktive Nodes  : " +  TH.activeNodes.mkString(", "))
 		log.info("Inaktive Nodes: " +  inact.mkString(", "))
 
 		TH.finish

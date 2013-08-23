@@ -3,7 +3,7 @@ package de.fau.wisebed.messages
 import eu.wisebed.api._
 import scala.collection.mutable
 import eu.wisebed.api.common.Message
-import de.fau.wisebed.wrappers.WrappedMessage._
+import de.fau.wisebed.WisebedApiConversions._
 
 trait NodeFilter extends MessageInput {
 	var nodes = Set[String]()

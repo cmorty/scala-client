@@ -6,10 +6,10 @@ import scala.language.implicitConversions
 import org.slf4j.LoggerFactory
 
 import de.fau.wisebed.WisebedApiConversions.kvp2map
-import eu.wisebed.api.wsn.ChannelHandlerDescription
+import eu.wisebed.api.wsn
 
-class WrappedChannelHandlerDescription(chd:ChannelHandlerDescription) {
-	val log = LoggerFactory.getLogger(WrappedChannelHandlerDescription.this.getClass)
+class ChannelHandlerDescription(chd:wsn.ChannelHandlerDescription) {
+	val log = LoggerFactory.getLogger(ChannelHandlerDescription.this.getClass)
 	def name:String = chd.getName
 	def description:String = chd.getDescription
 	def configuration:Map[String,String] = chd.getConfigurationOptions.toList
@@ -26,7 +26,3 @@ class WrappedChannelHandlerDescription(chd:ChannelHandlerDescription) {
 	def channelHandlerDescription = chd
 }
 
-object WrappedChannelHandlerDescription {
-	implicit def chd2wchd(chd:ChannelHandlerDescription):WrappedChannelHandlerDescription = new WrappedChannelHandlerDescription(chd)
-	implicit def wchd2chd(rchd:WrappedChannelHandlerDescription):ChannelHandlerDescription = rchd.channelHandlerDescription
-}

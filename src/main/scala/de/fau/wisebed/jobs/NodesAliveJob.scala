@@ -6,20 +6,20 @@ import scala.collection._
 import org.slf4j.LoggerFactory
 import java.util.Collections.SynchronizedMap
 
-object MoteAliveState extends Enumeration {
-	type MoteAliveState = Value
+object NodeAliveState extends Enumeration {
+	type NodeAliveState = Value
 	val Alive, Dead, Unknown, Error  = Value
 
-	def idToEnum(id:Int):MoteAliveState = id match {
+	def idToEnum(id:Int):NodeAliveState = id match {
 		case 1  => Alive
 		case 0  => Dead
 		case -1 => Unknown
 		case _  => Error
 	}
 }
-import MoteAliveState._
+import NodeAliveState._
 
-class NodesAliveJob(nodes:Seq[String]) extends Job[MoteAliveState](nodes) {		
+class NodesAliveJob(nodes:Seq[String]) extends Job[NodeAliveState](nodes) {		
 	val log = LoggerFactory.getLogger(this.getClass)
 
 	val successValue = Alive

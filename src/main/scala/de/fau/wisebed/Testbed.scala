@@ -40,11 +40,7 @@ class Testbed(val smEndpointURL:String) {
 	}
 	
 	protected def getReservations(reservation: rs.GetReservations):List[Reservation] = {
-		reservationSystem.getConfidentialReservations(secretAuthenticationKeys.toSeq, reservation).toList.map { res =>
-			val tmp = new Reservation(res.getFrom.toGregorianCalendar, res.getTo.toGregorianCalendar, res.getNodeURNs.toList, res.getUserData)
-			tmp.addKeys(asScalaBuffer(res.getData))
-			tmp
-		}
+		reservationSystem.getConfidentialReservations(secretAuthenticationKeys.toSeq, reservation).toList.map(CRD2reservation(_))
 	}
 	
 	
@@ -66,8 +62,12 @@ class Testbed(val smEndpointURL:String) {
 	/**
 	 * Forward wrapper to wiseML.getNodeUrns
 	 */
-	def getNodes(moteType:String*):List[String] =  wiseML.getNodeUrns(moteType)
+	def getNodes(nodeType:String*):List[String] =  wiseML.getNodeUrns(nodeType)
 	def getNodes():List[String] =  wiseML.getNodeUrns()
+	
+	def getNode(nodeType:String*) =  wiseML.getNodes(nodeType)
+	def getNode() =  wiseML.getNodes()
+	
 	
 	def addCredencials(auth:AuthenticationTriple) {
 		credentials ::= auth
@@ -98,7 +98,7 @@ class Testbed(val smEndpointURL:String) {
 	def getReservations(min:Int = 30):List[Reservation] = {
 		val from = new GregorianCalendar
 		val to = new GregorianCalendar
-		from.add(Calendar.MINUTE, -1)
+		from.add(Calendar.SECOND, -2)
 		to.add(Calendar.MINUTE, min)
 		getReservations(from, to)
 	}
@@ -115,7 +115,6 @@ class Testbed(val smEndpointURL:String) {
 	
 	
 	def freeReservation(res:Reservation) {
-		import Reservation._
 		sessionManagement.free(res.sm_reservationkeys)
 	}
 	

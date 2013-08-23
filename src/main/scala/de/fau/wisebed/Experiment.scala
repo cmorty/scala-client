@@ -1,26 +1,29 @@
 package de.fau.wisebed
 
-import jobs._
-import wrappers._
-import eu.wisebed.api.controller.Controller
-import eu.wisebed.api._
-import eu.wisebed.api.common._
-import eu.wisebed.api.controller._
-import scala.collection.JavaConversions._
-import org.slf4j.LoggerFactory
-import java.net.InetAddress
-import scala.collection.mutable.Buffer
-import Reservation.secretReservationKey_Rs2SM
-import scala.collection._
-import java.util.GregorianCalendar
-import java.util.Date
-import de.fau.wisebed.WisebedApiConversions._
-import de.fau.wisebed.messages.MsgLiner
-import de.fau.wisebed.messages.MessageLogger
 import java.io.InputStream
-import eu.wisebed.api.wsn.Program
+import java.util.GregorianCalendar
+import scala.collection.JavaConversions.asScalaBuffer
+import scala.collection.JavaConversions.bufferAsJavaList
+import scala.collection.JavaConversions.seqAsJavaList
+import scala.collection.Map
+import scala.collection.Seq
+import scala.collection.mutable.Buffer
+import org.slf4j.LoggerFactory
+import de.fau.wisebed.WisebedApiConversions._
+import de.fau.wisebed.messages.MessageLogger
+import de.fau.wisebed.messages.MsgLiner
+import eu.wisebed.api.WisebedServiceHelper
+import eu.wisebed.api.common
+import eu.wisebed.api.wsn
+import jobs.FlashJob
+import jobs.NodeOkFailJob
+import jobs.NodesAliveJob
+import wrappers.ChannelHandlerDescription
+import wrappers.Program
+import de.fau.wisebed.wrappers.ChannelHandlerConfiguration
+import de.fau.wisebed.wrappers.Program
 
-class MoteMessage(val node:String, val data:Array[Byte], val time:GregorianCalendar) {
+class NodeMessage(val node:String, val data:Array[Byte], val time:GregorianCalendar) {
 	def this (m:common.Message){
 		this(m.getSourceNodeId, m.getBinaryData, m.getTimestamp.toGregorianCalendar)
 	}
@@ -30,9 +33,6 @@ class MoteMessage(val node:String, val data:Array[Byte], val time:GregorianCalen
 
 case class ExperimentEndedException(t:String) extends Exception(t)
 
-/**
- * @todo There is a concurrency issue if a message is received before the id is added to the jobmap (this is unlikely, though)
- */	
 class Experiment (res:List[Reservation], implicit val tb:Testbed) {
 	protected val log = LoggerFactory.getLogger(this.getClass)
 
@@ -43,7 +43,6 @@ class Experiment (res:List[Reservation], implicit val tb:Testbed) {
 
 	if(log.isTraceEnabled){
 		val msghndl = new MessageLogger(mi => {
-			import WrappedMessage._
 			log.debug("Got message from " + mi.node + ": " + mi.dataString)
 		}) with MsgLiner
 		controller.addMessageInput(msghndl)
@@ -57,9 +56,9 @@ class Experiment (res:List[Reservation], implicit val tb:Testbed) {
 	log.debug("Local controller published on url: {}", controller.url)
 	
 	protected val wsnService:wsn.WSN = {	
-		val keys: Seq[eu.wisebed.api.sm.SecretReservationKey] = res.map(_.secretReservationKeys).flatten
+
 		
-		val wsnEndpointURL = tb.sessionManagement.getInstance(keys, controller.url)
+		val wsnEndpointURL = tb.sessionManagement.getInstance(res, controller.url)
 		log.debug("Got a WSN instance URL, endpoint is: \"{}\"", wsnEndpointURL)
 		WisebedServiceHelper.getWSNService(wsnEndpointURL)
 	}
@@ -74,13 +73,62 @@ class Experiment (res:List[Reservation], implicit val tb:Testbed) {
 		requireActive
 		val map = List.fill(nodes.size){new java.lang.Integer(0)}
 		val job = new FlashJob(nodes)
-		controller.addJob(job, wsnService.flashPrograms(nodes, map, List(prog)))
+		controller.addJob(job, wsnService.flashPrograms(nodes, map, List(wprogram2program(prog))))
 		job	
 	}
 	
-	def flash(file:InputStream, nodes:Seq[String]):FlashJob = flash(RichProgram.loadStream(file), nodes)
 	
-	def flash(file:String, nodes:Seq[String]):FlashJob = flash(RichProgram(file), nodes)
+	def flash(is:InputStream, nodes:Seq[String]):FlashJob = flash(Program(is), nodes)
+	
+	def flash(file:String, nodes:Seq[String]):FlashJob = flash(Program(file), nodes)
+	
+	/**
+	 * @param nodeProgMap A map of (nodes -> firmware files)
+	 * @return The job flashing the nodes
+	 */
+	def flash(nodeProgMap:Map[String, String]):FlashJob ={
+		requireActive
+		val nodeList = Buffer[String]()
+		val progList = Buffer[wsn.Program]()
+		val progMap = Buffer[Integer]()
+		val progs = scala.collection.mutable.Map[String, Int]()
+		
+		
+		for((node, file) <- nodeProgMap){
+			nodeList += node
+			progMap += progs.getOrElseUpdate(file, {
+				progList += wprogram2program(Program(file))
+				progList.size - 1
+			})
+			
+		}
+		val job = new FlashJob(nodeList)		 
+		controller.addJob(job, wsnService.flashPrograms(nodeList, progMap, progList))
+		job	
+	}
+	
+	/**
+	 * @param progNodeMap A Map of programs mapping to a list of nodes 
+	 * @return The job flashing the nodes
+	 * Using a dummy implicit -> http://stackoverflow.com/questions/3307427
+	 */
+	def flash(progNodeMap:Map[Program, Seq[String]])(implicit d: DummyImplicit):FlashJob ={
+		requireActive
+		val nodeList = Buffer[String]()
+		val progMap = Buffer[Integer]()
+		val progList = Buffer[wsn.Program]()
+		
+		for((prog, nodes) <- progNodeMap){
+			progList += prog
+			nodeList ++= nodes
+			progMap ++= List.fill(nodes.size){progList.size - 1}
+		}
+		val job = new FlashJob(nodeList)
+		
+		controller.addJob(job, wsnService.flashPrograms(nodeList, progMap, progList))
+		job	
+	}
+	
 	
 	def areNodesAlive(nodes:Seq[String]):NodesAliveJob = {
 		requireActive
@@ -109,17 +157,16 @@ class Experiment (res:List[Reservation], implicit val tb:Testbed) {
 		job
 	}
 	
-	def setChannelHandler(nodes:Seq[String], cnf:wsn.ChannelHandlerConfiguration):NodeOkFailJob = {
+	def setChannelHandler(nodes:Seq[String], cnf:ChannelHandlerConfiguration):NodeOkFailJob = {
 		requireActive
 		val cn = List.fill(nodes.size){cnf}
 		val job =  new NodeOkFailJob("setChannelHandler", nodes)
-		controller.addJob(job,wsnService.setChannelPipeline(nodes, cn))
+		controller.addJob(job,wsnService.setChannelPipeline(nodes, cn.map(wchc2chc(_))))
 		job
 	}
 	
 	
-	def supportedChannelHandlers:Seq[WrappedChannelHandlerDescription] = {
-		import wrappers.WrappedChannelHandlerDescription._
+	def supportedChannelHandlers:Seq[ChannelHandlerDescription] = {
 		wsnService.getSupportedChannelHandlers.map(chd2wchd(_))
 	}
 	

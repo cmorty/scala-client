@@ -5,6 +5,7 @@ import java.io.StringReader
 import eu.wisebed.wiseml.Setup
 import scala.collection.mutable.Buffer
 import scala.collection.JavaConversions._
+import de.fau.wisebed.WisebedApiConversions._
 
 class WiseML(serializedWiseML:String) {
 	lazy private val wiseml = JAXB.unmarshal(new StringReader(serializedWiseML), classOf[eu.wisebed.wiseml.Wiseml])
@@ -19,16 +20,16 @@ class WiseML(serializedWiseML:String) {
 	 * @return a List of {@link Setup.Node} instances
 	 */
 	
-	def getNodes(types:Seq[String] = null):List[Setup.Node] = {	
-		if (types == null || types.isEmpty) wiseml.getSetup.getNode.toList
-		else wiseml.getSetup.getNode.filter(x => {val id = x.getNodeType(); types.find(_.equalsIgnoreCase(id)) != None}).toList		
+	def getNodes(types:Seq[String] = null):List[Node] = {	
+		if (types == null || types.isEmpty) wiseml.getSetup.getNode.map(new Node(_)).toList
+		else wiseml.getSetup.getNode.filter(x => {val id = x.getNodeType; types.find(_.equalsIgnoreCase(id)) != None}).map(new Node(_)).toList		
 	}
 	/**
 	 * Allows passing a list rather than a Seq.
 	 */
-	def getNodes(ntype:String, ntypes:String*):List[Setup.Node] = getNodes(ntype +: ntypes)
+	def getNodes(ntype:String, ntypes:String*):List[Node] = getNodes(ntype +: ntypes)
 	
-	def getNodeUrns(types:Seq[String] = null):List[String] = getNodes(types).map(_.getId)
+	def getNodeUrns(types:Seq[String] = null):List[String] = getNodes(types).map(_.id)
 	def getNodeUrns(ntype:String, ntypes:String*):List[String] = getNodeUrns(ntype +: ntypes)
 	
 

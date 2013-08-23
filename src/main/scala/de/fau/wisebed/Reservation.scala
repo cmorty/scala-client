@@ -5,15 +5,15 @@ import java.util.GregorianCalendar
 
 import scala.collection.JavaConversions.seqAsJavaList
 import scala.collection.mutable.Buffer
-import scala.language.implicitConversions
 
 import org.slf4j.LoggerFactory
 
-import WisebedApiConversions.greg2XMLGreg
+import WisebedApiConversions._
 import eu.wisebed.api.rs
 import eu.wisebed.api.sm
 
-class Reservation(_from:GregorianCalendar, _to:GregorianCalendar,_nodeURNs:Seq[String], user:String) {
+
+class Reservation(_from:GregorianCalendar, _to:GregorianCalendar,_nodeURNs:Seq[String], user:String, keys:Iterable[rs.SecretReservationKey] = null) {
 	val log = LoggerFactory.getLogger(this.getClass)
 
 	val lfrom:GregorianCalendar = _from.clone.asInstanceOf[GregorianCalendar]
@@ -22,10 +22,17 @@ class Reservation(_from:GregorianCalendar, _to:GregorianCalendar,_nodeURNs:Seq[S
 	def from:GregorianCalendar = lfrom.clone.asInstanceOf[GregorianCalendar]
 	def to:GregorianCalendar = lto.clone.asInstanceOf[GregorianCalendar]
     
-	val nodeURNs = _nodeURNs.toList
+	def nodeURNs = _nodeURNs.toList
+	
+	@deprecated("Use nodeURNs", "Now")
+	def getNodeURNs = nodeURNs
+	
 	
 	var userData:String = ""
 	val secretReservationKeys = Buffer[rs.SecretReservationKey]()
+	if(keys != null) {
+		secretReservationKeys ++= keys
+	}
     
 	def inThePast = to.before(new GregorianCalendar)    
 	def now = {
@@ -57,16 +64,8 @@ class Reservation(_from:GregorianCalendar, _to:GregorianCalendar,_nodeURNs:Seq[S
 		f.format(from.getTime) + split + f.format(to.getTime)
  	}
  	
- 	def sm_reservationkeys:List[sm.SecretReservationKey] = {
- 		import Reservation._
- 		secretReservationKey_Rs2SM(secretReservationKeys).toList
- 	}
-}
-
-object Reservation {
-	implicit def reservation2CRD(res:Reservation):rs.ConfidentialReservationData = res.asConfidentialReservationData
-	
-	implicit def secretReservationKey_Rs2SM(rsKs: Traversable[rs.SecretReservationKey]): Buffer[sm.SecretReservationKey] = {
+ 	
+ 	private def secretReservationKey_Rs2SM(rsKs: Traversable[rs.SecretReservationKey]): Buffer[sm.SecretReservationKey] = {
 		val rv = Buffer[sm.SecretReservationKey]()
 		for(rsK <- rsKs) {
 			val rk = new sm.SecretReservationKey
@@ -76,4 +75,9 @@ object Reservation {
 		}
 		rv
 	}
+ 	
+ 	def sm_reservationkeys:List[sm.SecretReservationKey] = {
+ 		secretReservationKey_Rs2SM(secretReservationKeys).toList
+ 	}
 }
+

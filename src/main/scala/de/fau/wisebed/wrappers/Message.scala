@@ -8,7 +8,7 @@ import scala.language.implicitConversions
 import de.fau.wisebed.WisebedApiConversions.greg2XMLGreg
 import eu.wisebed.api.common
 
-class WrappedMessage (_msg:common.Message) {
+class Message (_msg:common.Message) {
 	def dataString = msg.getBinaryData.map(_.toChar).mkString
 	def dataString_=(data:String)=msg.setBinaryData(data.map(_.toByte).toArray)
 	
@@ -30,7 +30,3 @@ class WrappedMessage (_msg:common.Message) {
 	}
 }
 
-object WrappedMessage{
-	implicit def msg2wmsg(msg:common.Message):WrappedMessage = new WrappedMessage(msg)
-	implicit def wmsg2msg(wmsg:WrappedMessage):common.Message = wmsg.msg
-}

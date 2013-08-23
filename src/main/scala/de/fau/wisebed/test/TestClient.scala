@@ -19,7 +19,7 @@ object TestClient {
 		
 
 
-		val bw = new MessageWaiter(TH.activemotes,  "Contiki>")
+		val bw = new MessageWaiter(TH.activeNodes,  "Contiki>")
 		TH.exp.addMessageInput(bw)
 		
 		
@@ -32,7 +32,7 @@ object TestClient {
 		}
 		
 		log.debug("Sending \\n")
-		val snd = TH.exp.send(TH.activemotes, "help\n")
+		val snd = TH.exp.send(TH.activeNodes, "help\n")
 		if(!snd.success){
 			log.error("Failed to send information to nodes")
 			sys.exit(1)

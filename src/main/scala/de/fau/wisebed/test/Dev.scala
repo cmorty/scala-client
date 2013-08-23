@@ -19,7 +19,7 @@ object Dev {
 		setDefaultLogger
 		//Logger.getRootLogger().addAppender(new ConsoleAppender(layout));
 
-		var activemotes: List[String] = null
+		var activenodes: List[String] = null
 		var exp: Experiment = null
 		var res: List[Reservation] = null
 
@@ -38,7 +38,7 @@ object Dev {
 		val login = (conf \ "login").text.trim
 		val pass = (conf \ "pass").text.trim
 
-		//Get Motes
+		//Get Nodes
 		log.debug("Starting Testbed")
 		val tb = new Testbed(smEndpointURL)
 		
@@ -49,12 +49,12 @@ object Dev {
 		
 		//log.debug("Network: " + tb.getNetwork)
 		
-		log.debug("Requesting Motes")
-		val motes = tb.getNodes()
-		log.debug("Motes: " + motes.mkString(", "))
+		log.debug("Requesting Nodes")
+		val nodes = tb.getNodes()
+		log.debug("Nodes: " + nodes.mkString(", "))
 		try {
-			val alivem = tb.areNodesAlive(motes)()
-			log.debug("Motestates: " + alivem.map(x => {x._1 + ": " +x._2}).mkString(", "))
+			val alivem = tb.areNodesAlive(nodes)()
+			log.debug("Nodestate: " + alivem.map(x => {x._1 + ": " +x._2}).mkString(", "))
 		} catch {
 			case e: Exception => println("exception caught: " + e.printStackTrace())
 			Thread.sleep(1000*600)

@@ -1,7 +1,7 @@
 package de.fau.wisebed.messages
 
 import eu.wisebed.api._
-import de.fau.wisebed.wrappers.WrappedMessage._
+import de.fau.wisebed.WisebedApiConversions._
 import scala.collection
 import eu.wisebed.api.common.Message
 import scala.collection.mutable.ArrayBuffer
