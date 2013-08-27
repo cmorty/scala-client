@@ -17,6 +17,7 @@ import eu.wisebed.wiseml.Setup
 import eu.wisebed.api.rs.ConfidentialReservationData
 import scala.collection.JavaConversions._
 import scala.collection.mutable.Buffer
+import eu.wisebed.api.rs.PublicReservationData
 
 object WisebedApiConversions {
 	
@@ -80,9 +81,18 @@ object WisebedApiConversions {
 		new Reservation(res.getFrom.toGregorianCalendar, res.getTo.toGregorianCalendar, res.getNodeURNs.toList, res.getUserData,data2Key(res.getData))
 	}
 	
+	implicit def PRD2reservation(res:PublicReservationData):Reservation = {
+		new Reservation(res.getFrom.toGregorianCalendar, res.getTo.toGregorianCalendar, res.getNodeURNs, res.getUserData)
+		
+	}
+	
+	
 	implicit def secretReservationKey_Rs2SM(rsKs: Traversable[Reservation]): java.util.List[sm.SecretReservationKey] = {
 		rsKs.map(_.sm_reservationkeys).flatten.toList
 	}
+	
+	
+	
 	
 	//Message
 	implicit def message2wmessage(msg:common.Message):Message = new Message(msg)
