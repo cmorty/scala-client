@@ -125,6 +125,11 @@ class Experiment (res:List[Reservation], implicit val tb:Testbed) {
 		}
 		val job = new FlashJob(nodeList)
 		
+		/*
+		log.debug("Proglist: " + progList.map(_.name).mkString(",") + "\n"+
+				nodeList.zip(progMap).map(x => {x._1 + " -> " + x._2}).mkString("\n")
+		)*/
+		
 		controller.addJob(job, wsnService.flashPrograms(nodeList, progMap, progList))
 		job	
 	}
