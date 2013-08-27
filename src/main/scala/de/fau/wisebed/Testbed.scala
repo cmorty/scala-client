@@ -39,9 +39,10 @@ class Testbed(val smEndpointURL:String) {
 		ec
 	}
 	
-	protected def getReservations(reservation: rs.GetReservations):List[Reservation] = {
+	protected def getMyReservations(reservation: rs.GetReservations):List[Reservation] = {
 		reservationSystem.getConfidentialReservations(secretAuthenticationKeys.toSeq, reservation).toList.map(CRD2reservation(_))
 	}
+	
 	
 	
 	//Public Variables
@@ -88,11 +89,33 @@ class Testbed(val smEndpointURL:String) {
 	}
 	
 
-	def getReservations(from:GregorianCalendar, to:GregorianCalendar):List[Reservation] = {
+	def getMyReservations(from:GregorianCalendar, to:GregorianCalendar):List[Reservation] = {
 		val res = new rs.GetReservations
 		res.setFrom(from)
 		res.setTo(to)
-		getReservations(res)
+		getMyReservations(res)
+	}
+	
+	def getMyReservations(min:Int = 30):List[Reservation] = {
+		val from = new GregorianCalendar
+		val to = new GregorianCalendar
+		from.add(Calendar.SECOND, -2)
+		to.add(Calendar.MINUTE, min)
+		getMyReservations(from, to);
+	}
+	
+	def getReservations(from:GregorianCalendar, to: GregorianCalendar):List[Reservation] = {
+		val all = reservationSystem.getReservations(from, to).toList.map(PRD2reservation(_))
+		val my = getMyReservations(from, to)
+		
+		for(r <- my) {
+			val myr = all.find(x => {x.user == r.user && x.from == r.from && x.to == r.to})
+			myr match  {
+				case Some(x)=> x.addKeys(r.secretReservationKeys)
+				case None => log.error("Unable to find my Reservation from "  + r.from.toString + "to" + r.to.toString)
+			}
+		}
+		all
 	}
 	
 	def getReservations(min:Int = 30):List[Reservation] = {
