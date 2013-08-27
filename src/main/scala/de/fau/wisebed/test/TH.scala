@@ -80,6 +80,8 @@ object TH {
 			val r = tb.makeReservation(from, to, nodes, "morty")
 			log.debug("Got Reservations: \n" +  r.dateString() + " for " + r.nodeURNs.mkString(", ")) 
 			res ::= r
+		} else if(!res.find(_.now).get.mine) {
+			log.error("Someone else has an reservation!")
 		}
 		
 		exp = new Experiment(res.toList, tb)
