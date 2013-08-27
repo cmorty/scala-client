@@ -13,7 +13,7 @@ import eu.wisebed.api.rs
 import eu.wisebed.api.sm
 
 
-class Reservation(_from:GregorianCalendar, _to:GregorianCalendar,_nodeURNs:Seq[String], user:String, keys:Iterable[rs.SecretReservationKey] = null) {
+class Reservation(_from:GregorianCalendar, _to:GregorianCalendar,_nodeURNs:Seq[String], _user:String, keys:Iterable[rs.SecretReservationKey] = null) {
 	val log = LoggerFactory.getLogger(this.getClass)
 
 	val lfrom:GregorianCalendar = _from.clone.asInstanceOf[GregorianCalendar]
@@ -21,6 +21,7 @@ class Reservation(_from:GregorianCalendar, _to:GregorianCalendar,_nodeURNs:Seq[S
     
 	def from:GregorianCalendar = lfrom.clone.asInstanceOf[GregorianCalendar]
 	def to:GregorianCalendar = lto.clone.asInstanceOf[GregorianCalendar]
+	def user = _user
     
 	def nodeURNs = _nodeURNs.toList
 	
@@ -29,33 +30,38 @@ class Reservation(_from:GregorianCalendar, _to:GregorianCalendar,_nodeURNs:Seq[S
 	
 	
 	var userData:String = ""
-	val secretReservationKeys = Buffer[rs.SecretReservationKey]()
+	val _secretReservationKeys = Buffer[rs.SecretReservationKey]()
+
+	
 	if(keys != null) {
-		secretReservationKeys ++= keys
+		_secretReservationKeys ++= keys
 	}
     
+	def secretReservationKeys = _secretReservationKeys
 	def inThePast = to.before(new GregorianCalendar)    
 	def now = {
 		val t = new GregorianCalendar
 		lfrom.before(t) && lto.after(t)
 	}
-
+	
+	def mine =  _secretReservationKeys.size > 0
+	
 	def addKeys(keys:Iterable[rs.SecretReservationKey]):Unit = {
-		secretReservationKeys ++= keys
+		_secretReservationKeys ++= keys
 	}
 	
 	def asConfidentialReservationData:rs.ConfidentialReservationData = { 
 		val rv = new rs.ConfidentialReservationData
 		rv.setFrom(lfrom)
 		rv.setTo(lto)
-		rv.setUserData(user)
+		rv.setUserData(_user)
 		rv.getNodeURNs.addAll(nodeURNs)
 		rv
 	}
 
 	def copy():Reservation = {
- 		val rv = new Reservation(lfrom, lto, nodeURNs, user)
- 		rv.addKeys(secretReservationKeys)
+ 		val rv = new Reservation(lfrom, lto, nodeURNs, _user)
+ 		rv.addKeys(_secretReservationKeys)
  		rv
  	}
  	
@@ -77,7 +83,7 @@ class Reservation(_from:GregorianCalendar, _to:GregorianCalendar,_nodeURNs:Seq[S
 	}
  	
  	def sm_reservationkeys:List[sm.SecretReservationKey] = {
- 		secretReservationKey_Rs2SM(secretReservationKeys).toList
+ 		secretReservationKey_Rs2SM(_secretReservationKeys).toList
  	}
 }
 
