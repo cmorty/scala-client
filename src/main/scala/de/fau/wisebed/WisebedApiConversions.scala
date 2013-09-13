@@ -19,7 +19,15 @@ import scala.collection.JavaConversions._
 import scala.collection.mutable.Buffer
 import eu.wisebed.api.rs.PublicReservationData
 
+
 object WisebedApiConversions {
+	
+	class GregorianCalendarCopy(val gc:GregorianCalendar) {
+		def copy = gc.clone.asInstanceOf[GregorianCalendar]
+	}
+	
+	implicit def gc2gcc(gc:GregorianCalendar):GregorianCalendarCopy = new GregorianCalendarCopy(gc)
+	
 	
 	//KeyValuePair
 	implicit def kvp2map(kvp:List[common.KeyValuePair]):Map[String, String] = kvp.map(x => (x.getKey -> x.getValue)).toMap

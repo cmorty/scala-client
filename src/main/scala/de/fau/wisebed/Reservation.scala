@@ -16,11 +16,11 @@ import eu.wisebed.api.sm
 class Reservation(_from:GregorianCalendar, _to:GregorianCalendar,_nodeURNs:Seq[String], _user:String, keys:Iterable[rs.SecretReservationKey] = null) {
 	val log = LoggerFactory.getLogger(this.getClass)
 
-	val lfrom:GregorianCalendar = _from.clone.asInstanceOf[GregorianCalendar]
-	val lto = _to.clone.asInstanceOf[GregorianCalendar]
+	val lfrom:GregorianCalendar = _from.copy
+	val lto = _to.copy
     
-	def from:GregorianCalendar = lfrom.clone.asInstanceOf[GregorianCalendar]
-	def to:GregorianCalendar = lto.clone.asInstanceOf[GregorianCalendar]
+	def from:GregorianCalendar = lfrom.copy
+	def to:GregorianCalendar = lto.copy
 	def user = _user
     
 	def nodeURNs = _nodeURNs.toList
