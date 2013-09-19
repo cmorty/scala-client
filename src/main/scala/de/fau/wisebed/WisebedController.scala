@@ -84,53 +84,45 @@ private class MessageInputHolder(mi:MessageInput){
 		endpointInterface = "eu.wisebed.api.controller.Controller"
 )
 class WisebedController extends Controller {
-	
-	
-  	val log = LoggerFactory.getLogger(WisebedController.this.getClass)
 
-  	val controllerid =  WisebedController.getUniqueID
-  	
-  	val url = "http://" + InetAddress.getLocalHost.getCanonicalHostName + ":" + WisebedController.port + "/controller/" + controllerid
+	protected val log = LoggerFactory.getLogger(WisebedController.this.getClass)
 
-  	
-  
+	val controllerid = WisebedController.getUniqueID
+
+	val url = "http://" + InetAddress.getLocalHost.getCanonicalHostName + ":" + WisebedController.port + "/controller/" + controllerid
+
 	log.debug("Starting ExperimentController...")
 	log.debug("Endpoint URL: {}", url)
 
-	
-	
-	val endpoints =  WisebedController.interfaces.flatMap(x => {
-  	
-		   
-  			val url = "http://" + x + ":" + WisebedController.port + "/controller/" + controllerid
-  			log.debug("Connecting to " + url)
-  			try{
-  				val ep = Endpoint.publish(url, WisebedController.this)
-  				ep.setExecutor(Executors.newCachedThreadPool)
-  				List(ep)
-  			} catch {
-  				case e:Exception =>
-  					log.error("Failed to open " + url)
-  					List[Endpoint]() 
-  			}
-  			
-  		})
-  		
-  		
-  	
-	
+	val endpoints = WisebedController.interfaces.flatMap(x => {
 
+		val url = "http://" + x + ":" + WisebedController.port + "/controller/" + controllerid
+		log.debug("Connecting to " + url)
+		try {
+			val ep = Endpoint.publish(url, WisebedController.this)
+			ep.setExecutor(Executors.newCachedThreadPool)
+			List(ep)
+		} catch {
+			case e: Exception =>
+				log.error("Failed to open " + url)
+				List[Endpoint]()
+		}
+
+	})
+		
+		
+	
 	log.debug("Successfully started ExperimentControllers at " + url + " using ip(s): " + WisebedController.interfaces.mkString(", "))
 	
 	private val messageHandlers = new HashSet[MessageInputHolder] with SynchronizedSet[MessageInputHolder]
-	var notificationCallbacks = List[String => Unit]()
-	var endCallbacks = List[ () => Unit]()
+	private var notificationCallbacks = List[String => Unit]()
+	private var endCallbacks = List[ () => Unit]()
 	
 	
 	/*
 	 * This should be a DeamonActor, as the must be someone Non-Deamon to receive or send messages.
 	 */
-	val sDisp = new DaemonActor{
+	private val sDisp = new DaemonActor{
   		private var rjob = 0
   		private var rsBuf = List[RequestStatus]()
 		private val jobs =  new ListMap[String, Job[_]]
@@ -294,9 +286,6 @@ object WisebedController{
 		val local =  InetAddress.getAllByName(InetAddress.getLocalHost.getCanonicalHostName).map(_.getHostAddress)
 		
 		ext ++ local
-		
-		
-		
 		
 	}
 	

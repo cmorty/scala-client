@@ -28,11 +28,12 @@ import scala.util.Failure
  */
 class MessageWaiter(nodes:Iterable[String], needle:String) extends MessageInput with Future[Unit]{
 	
-	val prom = Promise[Unit]()
+	val log = LoggerFactory.getLogger(this.getClass)
 	
-	val log = LoggerFactory.getLogger(this.getClass) 
+	private val prom = Promise[Unit]()
+	
+	
 	private var stop = false
-	
 	
 	private var mbuf = nodes.map(_ -> "").toMap
 	private var ready = nodes.map(_ -> false).toMap

@@ -36,8 +36,7 @@ case class ExperimentEndedException(t:String) extends Exception(t)
 class Experiment (res:List[Reservation], implicit val tb:Testbed) {
 	protected val log = LoggerFactory.getLogger(this.getClass)
 
-	var active = true
-	def active_ (x:Boolean) {} //Null Setter
+	protected var active = true
 
 	protected val controller = new WisebedController
 
@@ -56,8 +55,6 @@ class Experiment (res:List[Reservation], implicit val tb:Testbed) {
 	log.debug("Local controller published on url: {}", controller.url)
 	
 	protected val wsnService:wsn.WSN = {	
-
-		
 		val wsnEndpointURL = tb.sessionManagement.getInstance(res, controller.url)
 		log.debug("Got a WSN instance URL, endpoint is: \"{}\"", wsnEndpointURL)
 		WisebedServiceHelper.getWSNService(wsnEndpointURL)

@@ -13,30 +13,29 @@ import eu.wisebed.api.rs
 import eu.wisebed.api.sm
 
 
-class Reservation(_from:GregorianCalendar, _to:GregorianCalendar,_nodeURNs:Seq[String], _user:String, keys:Iterable[rs.SecretReservationKey] = null) {
-	val log = LoggerFactory.getLogger(this.getClass)
+class Reservation(_from:GregorianCalendar, _to:GregorianCalendar,val nodeURNs:Seq[String], val user:String, keys:Iterable[rs.SecretReservationKey] = null) {
+	protected val log = LoggerFactory.getLogger(this.getClass)
 
-	val lfrom:GregorianCalendar = _from.copy
-	val lto = _to.copy
-    
+	
+	//Gregorian calander is not constant
+	protected val lfrom:GregorianCalendar = _from.copy
+	protected val lto = _to.copy
+	
 	def from:GregorianCalendar = lfrom.copy
 	def to:GregorianCalendar = lto.copy
-	def user = _user
-    
-	def nodeURNs = _nodeURNs.toList
 	
 	@deprecated("Use nodeURNs", "Now")
 	def getNodeURNs = nodeURNs
 	
 	
 	var userData:String = ""
-	val _secretReservationKeys = Buffer[rs.SecretReservationKey]()
-
+	private val _secretReservationKeys = Buffer[rs.SecretReservationKey]()
+	
 	
 	if(keys != null) {
 		_secretReservationKeys ++= keys
 	}
-    
+	
 	def secretReservationKeys = _secretReservationKeys
 	def inThePast = to.before(new GregorianCalendar)    
 	def now = {
@@ -54,15 +53,13 @@ class Reservation(_from:GregorianCalendar, _to:GregorianCalendar,_nodeURNs:Seq[S
 		val rv = new rs.ConfidentialReservationData
 		rv.setFrom(lfrom)
 		rv.setTo(lto)
-		rv.setUserData(_user)
+		rv.setUserData(user)
 		rv.getNodeURNs.addAll(nodeURNs)
 		rv
 	}
 
 	def copy():Reservation = {
- 		val rv = new Reservation(lfrom, lto, nodeURNs, _user)
- 		rv.addKeys(_secretReservationKeys)
- 		rv
+ 		new Reservation(lfrom, lto, nodeURNs, user, _secretReservationKeys)
  	}
  	
  	def dateString(format:String = "HH:mm:ss", split:String = " - "):String = {

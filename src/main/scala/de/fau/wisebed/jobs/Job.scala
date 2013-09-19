@@ -20,11 +20,11 @@ import scala.concurrent.CanAwait
 import java.util.concurrent.TimeoutException
 
 abstract class Job[S](nodes: Seq[String]) extends Actor with Future[Map[String, S]] {
-	val log:Logger
+	protected val log:Logger
 	
 	private val  prom =  Promise[Map[String, S]]()
 	
-	private[jobs] val states = Map[String, Promise[S]](nodes.map(_ -> Promise[S]()) : _*)
+	private[jobs] val states = Map[String, Promise[S]](nodes.map(_ -> Promise[S]()) : _*)	
 	private[jobs] def update(node: String, v:Int, msg:String):Option[S]
 	
 	val successValue: S
@@ -37,7 +37,7 @@ abstract class Job[S](nodes: Seq[String]) extends Actor with Future[Map[String, 
 	 	else throw new TimeoutException("Futures timed out after [" + atMost + "]")
 	}
 
-	def statusUpdate(s:Status) {
+	private def statusUpdate(s:Status) {
 		log.trace("Got state for " + s.getNodeId + ": " + s.getValue)
 		update(s.getNodeId, s.getValue, s.getMsg) match {
 			case Some(stat) => {
