@@ -4,3 +4,4 @@ target
 *.iws
 *.ipr
 /config.xml
+config.*xml
