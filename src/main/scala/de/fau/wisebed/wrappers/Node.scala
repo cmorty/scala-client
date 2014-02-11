@@ -6,9 +6,10 @@ import scala.language.implicitConversions
 class Node(_node:Setup.Node) {
 
 	def node = _node
-	def id = node.getId	
+	def id:String = node.getId	
 	def programDetails = node.getProgramDetails
 	def nodeType = node.getNodeType
 	def description = node.getDescription
+	override def toString = id
 }
 
