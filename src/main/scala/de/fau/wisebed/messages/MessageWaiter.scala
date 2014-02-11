@@ -26,17 +26,20 @@ import scala.util.Failure
  * @param nodes The nodes to monitor
  * @param needle The string to wait for. This may be multi line 
  */
-class MessageWaiter(nodes:Iterable[String], needle:String) extends MessageInput with Future[Unit]{
+class MessageWaiter(nodes:Iterable[String], needle:String) extends MessageInput with Future[Map[String, Boolean]]{
 	
 	val log = LoggerFactory.getLogger(this.getClass)
 	
-	private val prom = Promise[Unit]()
+	private val prom = Promise[Map[String, Boolean]]()
 	
 	
 	private var stop = false
 	
 	private var mbuf = nodes.map(_ -> "").toMap
+	
 	private var ready = nodes.map(_ -> false).toMap
+	
+	
 	
 	
 	def isDone:Boolean = prom.isCompleted	
@@ -61,7 +64,7 @@ class MessageWaiter(nodes:Iterable[String], needle:String) extends MessageInput 
 		}
 	}
 	
-	
+	def successMap = ready
 	
 	
 	/**
@@ -74,7 +77,7 @@ class MessageWaiter(nodes:Iterable[String], needle:String) extends MessageInput 
 	
 	
 	def unregister = synchronized {
-		prom.complete({if(isOK) new Success() else new Failure(new Exception("Stopped before finished"))})
+		prom.complete({if(isOK) new Success(ready) else new Failure(new Exception("Stopped before finished"))})
 		log.info("Finished promise! with: " + isOK)
 		stop = true
 		notify
@@ -99,8 +102,8 @@ class MessageWaiter(nodes:Iterable[String], needle:String) extends MessageInput 
 	}
 	
 	
-	def value:Option[Try[Unit]] =  prom.future.value
-	def onComplete[U](func: (Try[Unit]) ⇒ U)(implicit executor: ExecutionContext) = prom.future.onComplete(func)
+	def value:Option[Try[Map[String, Boolean]]] =  prom.future.value
+	def onComplete[U](func: (Try[Map[String, Boolean]]) ⇒ U)(implicit executor: ExecutionContext) = prom.future.onComplete(func)
 	def isCompleted = prom.future.isCompleted
 	
 	def ready(atMost: Duration)(implicit permit: CanAwait): this.type = {
