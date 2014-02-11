@@ -136,6 +136,9 @@ class Testbed(val smEndpointURL:String) {
 		makeReservation(res)
 	}
 	
+	def deleteReservation(res:Reservation) {
+		reservationSystem.deleteReservation(secretAuthenticationKeys.toSeq, res.secretReservationKeys)
+	}
 	
 	def freeReservation(res:Reservation) {
 		sessionManagement.free(res.sm_reservationkeys)
