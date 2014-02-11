@@ -1,0 +1,186 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.1//EN" "http://www.w3.org/TR/xhtml11/DTD/xhtml11.dtd">
+<html>
+        <head>
+          <title>jobs - WISEBED Scala Client API 1.1.0 API - de.fau.wisebed.jobs</title>
+          <meta name="description" content="jobs - WISEBED Scala Client API 1.1.0 API - de.fau.wisebed.jobs" />
+          <meta name="keywords" content="jobs WISEBED Scala Client API 1.1.0 API de.fau.wisebed.jobs" />
+          <meta http-equiv="content-type" content="text/html; charset=UTF-8" />
+          
+      <link href="../../../../lib/template.css" media="screen" type="text/css" rel="stylesheet" />
+      <link href="../../../../lib/diagrams.css" media="screen" type="text/css" rel="stylesheet" id="diagrams-css" />
+      <script type="text/javascript">
+         if(top === self) {
+            var url = '../../../../index.html';
+            var hash = 'de.fau.wisebed.jobs.package';
+            var anchor = window.location.hash;
+            var anchor_opt = '';
+            if (anchor.length >= 1)
+              anchor_opt = '@' + anchor.substring(1);
+            window.location.href = url + '#' + hash + anchor_opt;
+         }
+   	  </script>
+    
+        </head>
+        <body class="value">
+      <div id="definition">
+        <img src="../../../../lib/package_big.png" />
+        <p id="owner"><a href="../../../package.html" class="extype" name="de">de</a>.<a href="../../package.html" class="extype" name="de.fau">fau</a>.<a href="../package.html" class="extype" name="de.fau.wisebed">wisebed</a></p>
+        <h1>jobs</h1>
+      </div>
+
+      <h4 id="signature" class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">package</span>
+      </span>
+      <span class="symbol">
+        <span class="name">jobs</span>
+      </span>
+      </h4>
+      
+          <div id="comment" class="fullcommenttop"></div>
+        
+
+      <div id="mbrsel">
+        <div id="textfilter"><span class="pre"></span><span class="input"><input id="mbrsel-input" type="text" accesskey="/" /></span><span class="post"></span></div>
+        
+        
+        <div id="visbl">
+            <span class="filtertype">Visibility</span>
+            <ol><li class="public in"><span>Public</span></li><li class="all out"><span>All</span></li></ol>
+          </div>
+      </div>
+
+      <div id="template">
+        <div id="allMembers">
+        
+
+        <div id="types" class="types members">
+              <h3>Type Members</h3>
+              <ol><li name="de.fau.wisebed.jobs.FlashJob" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
+      <a id="FlashJobextendsJob[de.fau.wisebed.jobs.NodeFlashState.NodeFlashState]"></a>
+      <a id="FlashJob:FlashJob"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">class</span>
+      </span>
+      <span class="symbol">
+        <a href="FlashJob.html"><span class="name">FlashJob</span></a><span class="result"> extends <a href="Job.html" class="extype" name="de.fau.wisebed.jobs.Job">Job</a>[<a href="NodeFlashState$.html#NodeFlashState=de.fau.wisebed.jobs.NodeFlashState.Value" class="extmbr" name="de.fau.wisebed.jobs.NodeFlashState.NodeFlashState">NodeFlashState</a>]</span>
+      </span>
+      </h4>
+      
+    </li><li name="de.fau.wisebed.jobs.Job" visbl="pub" data-isabs="true" fullComment="no" group="Ungrouped">
+      <a id="Job[S]extendsActorwithFuture[Map[String,S]]"></a>
+      <a id="Job[S]:Job[S]"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier">abstract </span>
+        <span class="kind">class</span>
+      </span>
+      <span class="symbol">
+        <a href="Job.html"><span class="name">Job</span></a><span class="tparams">[<span name="S">S</span>]</span><span class="result"> extends <span class="extype" name="scala.actors.Actor">Actor</span> with <span class="extype" name="scala.concurrent.Future">Future</span>[<span class="extype" name="scala.Predef.Map">Map</span>[<span class="extype" name="scala.Predef.String">String</span>, <span class="extype" name="de.fau.wisebed.jobs.Job.S">S</span>]]</span>
+      </span>
+      </h4>
+      
+    </li><li name="de.fau.wisebed.jobs.NodeOkFailJob" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
+      <a id="NodeOkFailJobextendsJob[de.fau.wisebed.jobs.OKFailState.OKFailState]"></a>
+      <a id="NodeOkFailJob:NodeOkFailJob"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">class</span>
+      </span>
+      <span class="symbol">
+        <a href="NodeOkFailJob.html"><span class="name">NodeOkFailJob</span></a><span class="result"> extends <a href="Job.html" class="extype" name="de.fau.wisebed.jobs.Job">Job</a>[<a href="OKFailState$.html#OKFailState=de.fau.wisebed.jobs.OKFailState.Value" class="extmbr" name="de.fau.wisebed.jobs.OKFailState.OKFailState">OKFailState</a>]</span>
+      </span>
+      </h4>
+      
+    </li><li name="de.fau.wisebed.jobs.NodesAliveJob" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
+      <a id="NodesAliveJobextendsJob[de.fau.wisebed.jobs.NodeAliveState.NodeAliveState]"></a>
+      <a id="NodesAliveJob:NodesAliveJob"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">class</span>
+      </span>
+      <span class="symbol">
+        <a href="NodesAliveJob.html"><span class="name">NodesAliveJob</span></a><span class="result"> extends <a href="Job.html" class="extype" name="de.fau.wisebed.jobs.Job">Job</a>[<a href="NodeAliveState$.html#NodeAliveState=de.fau.wisebed.jobs.NodeAliveState.Value" class="extmbr" name="de.fau.wisebed.jobs.NodeAliveState.NodeAliveState">NodeAliveState</a>]</span>
+      </span>
+      </h4>
+      
+    </li></ol>
+            </div>
+
+        
+
+        <div id="values" class="values members">
+              <h3>Value Members</h3>
+              <ol><li name="de.fau.wisebed.jobs.NodeAliveState" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
+      <a id="NodeAliveState"></a>
+      <a id="NodeAliveState:NodeAliveState"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">object</span>
+      </span>
+      <span class="symbol">
+        <a href="NodeAliveState$.html"><span class="name">NodeAliveState</span></a><span class="result"> extends <span class="extype" name="scala.Enumeration">Enumeration</span></span>
+      </span>
+      </h4>
+      
+    </li><li name="de.fau.wisebed.jobs.NodeFlashState" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
+      <a id="NodeFlashState"></a>
+      <a id="NodeFlashState:NodeFlashState"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">object</span>
+      </span>
+      <span class="symbol">
+        <a href="NodeFlashState$.html"><span class="name">NodeFlashState</span></a><span class="result"> extends <span class="extype" name="scala.Enumeration">Enumeration</span></span>
+      </span>
+      </h4>
+      
+    </li><li name="de.fau.wisebed.jobs.OKFailState" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
+      <a id="OKFailState"></a>
+      <a id="OKFailState:OKFailState"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">object</span>
+      </span>
+      <span class="symbol">
+        <a href="OKFailState$.html"><span class="name">OKFailState</span></a><span class="result"> extends <span class="extype" name="scala.Enumeration">Enumeration</span></span>
+      </span>
+      </h4>
+      
+    </li></ol>
+            </div>
+
+        
+
+        
+        </div>
+
+        <div id="inheritedMembers">
+        
+        
+        </div>
+
+        <div id="groupedMembers">
+        <div class="group" name="Ungrouped">
+              <h3>Ungrouped</h3>
+              
+            </div>
+        </div>
+
+      </div>
+
+      <div id="tooltip"></div>
+
+      <div id="footer">  </div>
+      <script defer="defer" type="text/javascript" id="jquery-js" src="../../../../lib/jquery.js"></script><script defer="defer" type="text/javascript" id="jquery-ui-js" src="../../../../lib/jquery-ui.js"></script><script defer="defer" type="text/javascript" id="tools-tooltip-js" src="../../../../lib/tools.tooltip.js"></script><script defer="defer" type="text/javascript" id="template-js" src="../../../../lib/template.js"></script>
+    </body>
+      </html>
